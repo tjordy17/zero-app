@@ -86,10 +86,8 @@ public class PredPreySim extends BaseFrame{
     }
 
     //------MAIN & HELPER FUNCTIONS-------------
-    public static void main(){
-        
+    public static void main(String[] args){
         PredPreySim run = new PredPreySim();
-        
     }
     public int getScreenWidth() {
         return getWidth();
