@@ -1,3 +1,67 @@
+# zero-app / EcoSim
+
+A small Java/Swing prototype for a predator–prey simulation (EcoSim). This
+repository contains a lightweight `BaseFrame` helper and a demo application
+`PredPreySim` used for UI and simulation experiments.
+
+## Prerequisites
+- Java Development Kit (JDK) 11 or newer installed and on your `PATH`.
+- (Optional) VS Code or IntelliJ IDEA for editing and debugging.
+
+## Quick build & run
+From the project root (PowerShell):
+
+Compile all sources into an `out/` directory:
+```powershell
+javac -d out *.java
+```
+
+Run the application:
+```powershell
+java -cp out PredPreySim
+```
+
+Notes:
+- If you edit sources, re-run the `javac` step and restart the program.
+- For IDE usage, create a run configuration that launches `PredPreySim`.
+
+## Project layout
+- `*.java` — Java source files (UI and simulation classes).
+- `out/` — compiler output (ignored by Git via `.gitignore`).
+
+## Git and branches
+- Feature work should be done on branches (for example, `Graphics`). Push
+  your branch and open a Pull Request on GitHub for review before merging.
+- A preview branch (e.g. `merge/Graphics-preview`) can be used to test merges
+  without updating `main` immediately.
+
+## Troubleshooting
+- If you see merge conflicts (e.g., `README.md`), resolve the conflicted
+  regions, then mark resolution:
+```powershell
+git add README.md
+git commit
+```
+- If compiled artifacts are accidentally tracked, remove them from the repo
+  (they remain on disk) then commit:
+```powershell
+git rm --cached -r out
+git rm --cached *.class
+git add .gitignore
+git commit -m "Remove compiled artifacts"
+```
+
+## Development tips
+- Use VS Code's Java extensions or IntelliJ for quick run/debug and
+  Hot Code Replace (limited to method-body changes).
+- To inspect compiled bytecode, use `javap`:
+```powershell
+javap -c -p -classpath out PredPreySim
+```
+
+---
+If you want screenshots, CI build steps, or Maven/Gradle integration added to
+this README, tell me what to include and I'll update it.
 # EcoSim: The Predator-Prey Balance
 
 🌿 Project Overview
