@@ -43,3 +43,8 @@ A key feature of the tool is the real-time population graph. In a stable environ
 The Peak: When Prey population peaks, the Predator population begins to rise.
 
 The Crash: When Predator population peaks, the Prey population plummets, eventually causing the Predator line to drop in response.
+
+
+# build
+
+This project backend is built using Java (Spring Boot). Frontend work uses Next.js. See `backend/README.md` for build and run instructions for the Java service.
