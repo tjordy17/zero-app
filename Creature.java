@@ -66,11 +66,8 @@ public class Creature {
         //in subclasses create new object of tyeop wolf or sheep
     }
 
-    //not sure how to connect sheep to eating t
-    public boolean eat(Creature prey) {
+    public void eat() {
 
-        //in subclass delete an object of oposite type and gain energy from it
-        return false;
     }
 
     public void draw(Graphics2D g2d){
