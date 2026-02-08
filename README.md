@@ -198,9 +198,3 @@ Compress-Archive -Path * -DestinationPath ../zero-app.zip
 ```
 
 ---
-If you want, I can create `PredPreySim.jar` now in the workspace and add the
-jar to a GitHub release draft — tell me if you want me to (A) build the JAR
-now, (B) add a short demo GIF, or (C) create a release draft on GitHub.
-
-"""
-
