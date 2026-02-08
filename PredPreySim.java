@@ -5,185 +5,289 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 
-public class PredPreySim extends BaseFrame{
+public class PredPreySim extends BaseFrame {
 
-    //------Logic------
-    private boolean load = false;
+    // ------Logic------
+    private boolean load = false, simRunning = true, sheepFlag = true;
 
     int gridWidth = 30, gridHeight = 20;
-    private int [][] squares = new int[gridHeight][gridWidth];
-    private Grass [][] grassArray = new Grass[gridHeight][gridWidth];
+    private int[][] squares = new int[gridHeight][gridWidth];
+    private Grass[][] grassArray = new Grass[gridHeight][gridWidth];
     private ArrayList<Wolf> wolflist = new ArrayList<Wolf>();
     private ArrayList<Sheep> sheeplist = new ArrayList<Sheep>();
 
-    int liveGrass = 0;
-    int liveWolf = 0;
-    int liveSheep = 0;
-    
-    //------UI------
-    int screenWidth = 1530; 
+    private int liveGrass = 0;
+    private int liveWolf = 0;
+    private int liveSheep = 20;
+
+    private int step = 0, steptimer = 0;
+    private int stepTimerLimit = 25, stepMax = 100;
+
+    private int sheepReproductionMin = 60;
+    // ------UI------
+    int screenWidth = 1530;
     int screenHeight = 850;
-    
-    //fonts
+
+    // fonts
     public static final Font bahnschrift32 = new Font("Bahnschrift", Font.PLAIN, 32);
     public static final Font bahnschrift64 = new Font("Bahnschrift", Font.PLAIN, 64);
-    //lines
+    // lines
     public static final BasicStroke thickPen = new BasicStroke(10);
     public static final BasicStroke medPen = new BasicStroke(4);
     public static final BasicStroke thinPen = new BasicStroke(2);
-    //colors
+    // colors
     public static final Color BURNTORANGE = new Color(204, 85, 0);
     public static final Color BURNTORANGELITE = new Color(201, 136, 89);
     public static final Color BEIGEORANGE = new Color(254, 245, 231);
     public static final Color DARKBEIGE = new Color(217, 203, 182);
     public static final Color DARKERBEIGE = new Color(176, 163, 144);
 
-    //----LOGIC & OTHER COOL STUFF---------
+    // ----LOGIC & OTHER COOL STUFF---------
     @Override
-    public void move(){
-        //System.out.print("Working");
-        if(!load){//loads objects
-            System.out.print(screenWidth);
+    public void move() {
+        if (!load) {// loads objects
             loadCreatures();
+            // tmp test
+            // sheeplist.add(new Sheep(5, 10));
+            // sheeplist.add(new Sheep(7, 15));
+            // sheeplist.get(0).setEnergy(60);
+            // sheeplist.get(1).setEnergy(60);
+
             load = true;
         }
-        runGrid();
+        step();
     }
 
-    private void loadCreatures(){
-        for(int i = 0; i< gridWidth;i++){
-            for(int j = 0; j< gridHeight ; j++){
-                grassArray[j][i] = new Grass(i, j, randint(0,300));
-                if(grassArray[j][i].getGrowth() >= 100 ){
+    private void step() {
+        if (simRunning) {
+            steptimer++;
+            if (steptimer >= stepTimerLimit) {
+                steptimer = 0;
+                step++;
+                sheepAct();
+            }
+            if (step >= stepMax) {
+                simRunning = false;
+            }
+        }
+    }
+
+    private void sheepAct() {
+
+        // System.out.print("Sheep Act");
+        for (int i = 0; i < sheeplist.size(); i++) {
+            Sheep sheep = sheeplist.get(i);
+            // creates a rectangle and checks for different stuff
+            Rectangle sight = new Rectangle(sheep.getX() - sheep.getRange(), sheep.getY() - sheep.getRange(),
+                    (sheep.getRange() * 2) + 1, (sheep.getRange() * 2) + 1);
+
+            // reproducing
+
+            for (int j = 0; j < sheeplist.size(); j++) {
+                Sheep sheep2 = sheeplist.get(j);
+                if (sheep != sheep2) {
+                    if (sight.contains(sheep2.getX(), sheep2.getY())
+                            && sheep2.getEnergy() >= sheepReproductionMin
+                            && sheep.getEnergy() >= sheepReproductionMin && sheep.getTurn() && sheep2.getTurn()) {
+                        sheep.setEnergy(sheep.getEnergy() / 2);
+                        sheep2.setEnergy(sheep2.getEnergy() / 2);
+                        sheep.setTurn(false);
+                        sheep2.setTurn(false);
+                        addSheep(sheeplist.size());
+                    }
+                }
+            }
+            // eating grass
+            for (int w = sheepFlag ? 0 : gridWidth - 1; (sheepFlag ? w : 0) < (sheepFlag ? gridWidth : w); w = sheepFlag
+                    ? w + 1
+                    : w - 1) {
+                for (int k = sheepFlag ? 0 : gridHeight - 1; (sheepFlag ? k : 0) < (sheepFlag ? gridHeight
+                        : k); k = sheepFlag ? k + 1 : k - 1) {
+                    for (int l = 0; l < sheeplist.size(); l++) {
+                        Sheep sheep2 = sheeplist.get(l);
+                        // finds food
+                        if (sight.contains(grassArray[k][w].getX(), grassArray[k][w].getY())
+                                && sheep.getTurn()
+                                && grassArray[k][w].getGrowth() >= 100
+                                && randint(0, 10) >= 5
+                                && grassArray[k][w].getX() != sheep2.getX()
+                                && grassArray[k][w].getY() != sheep2.getY()) {
+                            // System.out.print("found food to eat\n");
+                            sheep.setX(grassArray[k][w].getX());
+                            sheep.setY(grassArray[k][w].getY());
+                            sheep.eatGrass();
+                            grassArray[k][w].setGrowth(0);
+                            sheep.setTurn(false);
+                        }
+                    }
+                }
+            }
+            //not eating grass
+            for (int w = sheepFlag ? 0 : gridWidth - 1; (sheepFlag ? w : 0) < (sheepFlag ? gridWidth : w); w = sheepFlag
+                    ? w + 1
+                    : w - 1) {
+                for (int k = sheepFlag ? 0 : gridHeight - 1; (sheepFlag ? k : 0) < (sheepFlag ? gridHeight
+                        : k); k = sheepFlag ? k + 1 : k - 1) {
+                    for (int l = 0; l < sheeplist.size(); l++) {
+                        Sheep sheep2 = sheeplist.get(l);
+                        // finds food
+                        if (sight.contains(grassArray[k][w].getX(), grassArray[k][w].getY())
+                                && sheep.getTurn()
+                                && randint(0, 10) >= 5
+                                && grassArray[k][w].getX() != sheep2.getX()
+                                && grassArray[k][w].getY() != sheep2.getY()) {
+                            // System.out.print("no food, sad\n");
+                            sheep.setX(grassArray[k][w].getX());
+                            sheep.setY(grassArray[k][w].getY());
+                            sheep.setTurn(false);
+                        }
+                    }
+                }
+            }
+            if (randint(0, 1) == 1) {
+                sheepFlag = !sheepFlag;
+            }
+            sheep.setTurn(true);
+            liveSheep = sheeplist.size();
+            System.out.printf("Live sheep %d\n", liveSheep);
+        }
+    }
+
+    private void loadCreatures() {
+        // creates grass
+        for (int i = 0; i < gridWidth; i++) {
+            for (int j = 0; j < gridHeight; j++) {
+                grassArray[j][i] = new Grass(i, j, randint(0, 200));
+                if (grassArray[j][i].getGrowth() >= 100) {
                     liveGrass++;
                 }
             }
         }
-
-        for(int i = 0; i<liveSheep; i++){
-            int x, y;
-            x = randint(0, gridWidth-1);
-            y = randint(0, gridHeight-1);
-            for(int j = 0; j < i; j++){
-                while(sheeplist.get(j).getX() == x && sheeplist.get(j).getY() == y){
-                    x = randint(0, gridWidth-1);
-                    y = randint(0, gridHeight-1);
-                }   
-            }
-            sheeplist.add(new Sheep(x, y));
+        // creates sheep
+        for (int i = 0; i < liveSheep; i++) {
+            addSheep(i);
         }
-
-        for(int i = 0; i<liveWolf; i++){
+        // creates wolves
+        for (int i = 0; i < liveWolf; i++) {
             int x, y;
-            x = randint(0, gridWidth-1);
-            y = randint(0, gridHeight-1);
-            for(int j = 0; j < i; j++){
-                for(int k = 0; k < sheeplist.size(); k++){
-                    while((wolflist.get(j).getX() == x && wolflist.get(j).getY() == y) || (sheeplist.get(k).getX() == x && sheeplist.get(k).getY() == y)){
-                        x = randint(0, gridWidth-1);
-                        y = randint(0, gridHeight-1);
-                    }  
-                } 
+            x = randint(0, gridWidth - 1);
+            y = randint(0, gridHeight - 1);
+            for (int j = 0; j < i; j++) {
+                for (int k = 0; k < sheeplist.size(); k++) {
+                    while ((wolflist.get(j).getX() == x && wolflist.get(j).getY() == y)
+                            || (sheeplist.get(k).getX() == x && sheeplist.get(k).getY() == y)) {
+                        x = randint(0, gridWidth - 1);
+                        y = randint(0, gridHeight - 1);
+                    }
+                }
             }
             wolflist.add(new Wolf(x, y));
         }
-        
+
     }
 
-    private void runGrid(){
-        for(int i = 0; i < squares[0].length; i++){
-                for(int j = 0; j < squares.length; j++){
-                    
-                }
+    private void addSheep(int i) {
+        int x, y;
+        x = randint(0, gridWidth - 1);
+        y = randint(0, gridHeight - 1);
+        for (int j = 0; j < i; j++) {
+            while (sheeplist.get(j).getX() == x && sheeplist.get(j).getY() == y) {
+                x = randint(0, gridWidth - 1);
+                y = randint(0, gridHeight - 1);
             }
-
+        }
+        sheeplist.add(new Sheep(x, y));
     }
 
-    //-----DRAWING STUFF!---------
+    // -----DRAWING STUFF!---------
     @Override
-    public void draw(Graphics g){
+    public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        if(load){
+        if (load) {
             background(g2d);
-            drawGrid(g2d); 
+            drawGrid(g2d);
             drawGrass(g2d);
             drawSheep(g2d);
             drawWolf(g2d);
         }
     }
 
-    //draws simulation elements
-    private void drawGrid(Graphics2D g2d){
+    // draws simulation elements
+    private void drawGrid(Graphics2D g2d) {
         boolean flag = true;
-            for(int i = 0; i < squares[0].length; i++){
-                for(int j = 0; j < squares.length; j++){
-                    if(flag){
-                        g2d.setColor(BURNTORANGE);  
-                    }else{
-                        g2d.setColor(BURNTORANGELITE);
-                    }
-                    flag = !flag;
-                    g2d.fillRect(i * 20 + 715, j * 20 + 100, 20, 20);//settings area
+        for (int i = 0; i < squares[0].length; i++) {
+            for (int j = 0; j < squares.length; j++) {
+                if (flag) {
+                    g2d.setColor(BURNTORANGE);
+                } else {
+                    g2d.setColor(BURNTORANGELITE);
                 }
                 flag = !flag;
+                g2d.fillRect(i * 20 + 715, j * 20 + 100, 20, 20);// settings area
             }
+            flag = !flag;
+        }
     }
 
-    private void drawSheep(Graphics2D g2d){
-        for(int i = 0; i<sheeplist.size(); i++){
+    private void drawSheep(Graphics2D g2d) {
+        for (int i = 0; i < sheeplist.size(); i++) {
             sheeplist.get(i).draw(g2d);
-        }   
+        }
     }
 
-    private void drawWolf(Graphics2D g2d){
-        for(int i = 0; i<wolflist.size(); i++){
+    private void drawWolf(Graphics2D g2d) {
+        for (int i = 0; i < wolflist.size(); i++) {
             wolflist.get(i).draw(g2d);
-        }   
+        }
     }
 
-    private void drawGrass(Graphics2D g2d){
-        for(int i = 0; i< gridWidth;i++){
-            for(int j = 0; j< gridHeight ; j++){
+    private void drawGrass(Graphics2D g2d) {
+        for (int i = 0; i < gridWidth; i++) {
+            for (int j = 0; j < gridHeight; j++) {
                 grassArray[j][i].draw(g2d);
             }
         }
     }
 
-    //draws background elements
-    private void background(Graphics2D g2d){
+    // draws background elements
+    private void background(Graphics2D g2d) {
         g2d.setColor(DARKBEIGE);
         g2d.fillRect(0, 0, screenWidth, screenHeight);
 
         g2d.setColor(DARKERBEIGE);
-        g2d.fillRect(50, 50, 400, screenHeight - 100);//settings area
+        g2d.fillRect(50, 50, 400, screenHeight - 100);// settings area
 
-        g2d.fillRect(525, 50, 940, screenHeight - 350);//simulation area
-        
-        g2d.fillRect(525, 590, 940, 200);//stats area
+        g2d.fillRect(525, 50, 940, screenHeight - 350);// simulation area
+
+        g2d.fillRect(525, 590, 940, 200);// stats area
+
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(bahnschrift32);
+        g2d.drawString(String.format("Step: %d", step), 730, 85);
     }
 
-    //------MAIN & HELPER FUNCTIONS-------------
-    public static void main(){
+    // ------MAIN & HELPER FUNCTIONS-------------
+    public static void main() {
         PredPreySim run = new PredPreySim();
     }
 
     // public int getScreenWidth() {
-    //     return getWidth();
+    // return getWidth();
     // }
 
     // public int getScreenHeight() {
-    //     return getHeight();
+    // return getHeight();
     // }
 
-    private int randint(int a, int b){
-        int range = b-a+1;
-        return (int)(Math.random()*range + a );
+    private int randint(int a, int b) {
+        int range = b - a + 1;
+        return (int) (Math.random() * range + a);
     }
 
-
-    public PredPreySim(){
+    public PredPreySim() {
         super("PredPreySim", 1530, 850);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
+
     }
 }

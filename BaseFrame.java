@@ -144,6 +144,7 @@ class BaseFrame extends JFrame implements KeyListener, ActionListener, MouseMoti
 		}
 
 		public void paintComponent(Graphics g){
+			super.paintComponent(g);
 			main.draw(g);
 		}		
 	}

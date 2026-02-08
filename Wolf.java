@@ -15,19 +15,19 @@ public class Wolf extends Creature {
     }
 
     @Override
-    public boolean reproduce(Creature other) {
-        if (other instanceof Wolf) { // Make sure a Wolf isn't trying to reproduce with a Sheep!
-            Wolf partner = (Wolf) other;
-            if (this.getEnergy() > 60 && partner.getEnergy() > 60) {
-                //Wolf offspring = new Wolf(20); 
-                int energyUsed = getEnergy() / 2;
-                int newEnergy = getEnergy() - energyUsed;
-                setEnergy(newEnergy);
-                return true;
+    public void reproduce() {
+        // if (other instanceof Wolf) { // Make sure a Wolf isn't trying to reproduce with a Sheep!
+        //     Wolf partner = (Wolf) other;
+        //     if (this.getEnergy() > 60 && partner.getEnergy() > 60) {
+        //         //Wolf offspring = new Wolf(20); 
+        //         int energyUsed = getEnergy() / 2;
+        //         int newEnergy = getEnergy() - energyUsed;
+        //         setEnergy(newEnergy);
+        //         //return true;
 
-            }
-        }
-        return false;
+        //     }
+        // }
+        // //return false;
     }
 
 
@@ -45,9 +45,8 @@ public class Wolf extends Creature {
 
     public void draw(Graphics2D g2d){
         g2d.setColor(Dark);
-        g2d.fillRect(x * 20 + 715, y * 20 + 100, 20, 20);//settings area
+        g2d.fillRect(x * 20 + 715 + 1, y * 20 + 100 + 1, 20 - 5, 20 - 5);//settings area
         g2d.setColor(Black);
-        g2d.drawRect(x * 20 + 715, y * 20 + 100, 20, 20);//settings area
+        g2d.drawRect(x * 20 + 715 + 1, y * 20 + 100 + 1, 20 - 5, 20 - 5);//settings area
     }  
-    
 }

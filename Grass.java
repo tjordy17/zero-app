@@ -5,6 +5,10 @@ public class Grass {
     int growth;
 
     public static final Color Green = new Color(63, 222, 49);
+    public static final Color Greenish = new Color(97, 187, 49);
+    public static final Color GreenRed = new Color(132, 153, 49);
+    public static final Color RedGreen = new Color(166, 118, 49);
+    public static final Color Redish = new Color(201, 84, 49);
     public static final Color Red = new Color(235, 49, 49);
 
     public Grass(int x, int y, int growth){
@@ -17,16 +21,16 @@ public class Grass {
         if(growth >= 100){
             g2d.setColor(Green);
         }else if(growth>=80 && growth<100 ){
-            g2d.setColor(Red);
+            g2d.setColor(Greenish);
         }
         else if(growth>=60 && growth<80 ){
-            g2d.setColor(Red);
+            g2d.setColor(GreenRed);
         }
         else if(growth>=40 && growth<60 ){
-            g2d.setColor(Red);
+            g2d.setColor(RedGreen);
         }
         else if(growth>=20 && growth<40 ){
-            g2d.setColor(Red);
+            g2d.setColor(Redish);
         }
         else if(growth>=0 && growth<20 ){
             g2d.setColor(Red);

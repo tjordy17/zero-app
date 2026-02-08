@@ -6,7 +6,8 @@ public class Creature {
     protected int energy;
     protected int x;
     protected int y;
-
+    protected int range;
+    protected boolean turn = true;
 
     public Creature(int x, int y) {
         this.energy = 30;
@@ -14,11 +15,26 @@ public class Creature {
         this.y = y;
     }
 
+    public boolean getTurn() {
+        return turn;
+    }
+    public void setTurn(boolean turn) {
+        this.turn = turn;
+    }
+
     public int getEnergy() {
         return energy;
     }
     public void setEnergy(int energy) {
         this.energy = energy;
+    }
+
+    public int getRange(){
+        return range;
+    }
+
+    public void setRange(int range){
+        this.range = range;
     }
 
     public int getX(){
@@ -46,9 +62,8 @@ public class Creature {
 
 
     }
-    public boolean reproduce(Creature other) {
+    public void reproduce() {
         //in subclasses create new object of tyeop wolf or sheep
-        return false;
     }
 
     //not sure how to connect sheep to eating t
