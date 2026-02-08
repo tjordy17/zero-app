@@ -8,7 +8,7 @@ import java.util.*;
 
 public class PredPreySim extends BaseFrame {
     // ------Logic------
-    private boolean load = false, simRunning = true, sheepFlag = true, wolfFlag = true;
+    private boolean load = false, simRunning = false, sheepFlag = true, wolfFlag = true;
 
     int gridWidth = 30, gridHeight = 20;
     private int[][] squares = new int[gridHeight][gridWidth];
