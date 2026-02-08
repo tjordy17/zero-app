@@ -66,49 +66,54 @@ this README, tell me what to include and I'll update it.
 
 🌿 Project Overview
 EcoSim is a focused biological simulation designed to demonstrate the "coupled" relationship between two species. By simulating individual agents, the tool reveals how predator and prey populations naturally oscillate and how external "stress tests" can trigger a total ecosystem collapse.
+# zero-app / EcoSim
 
-🧬 The Core Logic: The Energy Loop
-The simulation operates on a closed-loop energy system. Every "step" (iteration) calculates the survival of two agent types:
+A small Java/Swing predator–prey simulation prototype.
 
-The Prey: Gains energy by consuming a regenerating environmental resource. Their goal is to avoid predators while maintaining enough energy to reproduce.
+## What this repository contains
+- `BaseFrame.java` — lightweight Swing helper frame used by the demo.
+- `PredPreySim.java` — main simulation application (Swing GUI + simulation).
+- `Sheep.java`, `Wolf.java`, `Grass.java`, `Creature.java` — simulation agent classes.
+- `SliderExample.java` — a standalone example showing a `JSlider` usage.
 
-The Predator: Gains energy exclusively by hunting prey. If the prey population drops too low, the predators face immediate starvation.
+## Prerequisites
+- Java Development Kit (JDK) 11 or newer installed and on your `PATH`.
+- (Optional) An IDE such as VS Code or IntelliJ IDEA for editing/debugging.
 
-Agent Decision Tree
-Can I Reproduce? (If Energy > Threshold + Mate is nearby) → Action: Spend energy to spawn new agent.
+## Quick build & run
+From the project root (PowerShell or any shell):
 
-Am I Hungry? (If Food is in Range) → Action: Move to food and consume.
+Compile all sources into an `out/` directory:
+```powershell
+javac -d out *.java
+```
 
-Am I Lost? (No food/mate detected) → Action: Random movement (Scout) at an energy cost.
+Run the application (this launches the Swing GUI):
+```powershell
+java -cp out PredPreySim
+```
 
-Am I Out of Energy? (If Energy ≤ 0) → Action: Death/Removal from grid.
+Notes:
+- If you edit sources, re-run the `javac` step and restart the program.
+- `PredPreySim` now has a standard `public static void main(String[] args)` entrypoint.
 
-🛠 Environmental Stress Tests
-The "Learning Tool" aspect allows users to intentionally break the ecosystem to see the consequences:
+## UI notes
+- The simulation window contains a settings area on the left. A `JSlider` was added
+  to the settings region to control the starting energy for newly created sheep
+  (backing field: `Sheep.START_ENERGY`). Use the slider to tweak initial energy
+  before starting or reloading the simulation.
+- `SliderExample.java` is a separate demo that demonstrates slider usage and
+  can be run independently; it is not required to use the in-sim slider.
 
-1. The "Invasive Growth" Stress Test
-Users can set the Prey Reproduction Rate to maximum.
+## Project layout
+- Root Java files: the Swing UI and simulation code lives at the repository root.
+- `out/`: compiler output directory (ignored from version control).
 
-The Lesson: This demonstrates how prey can "overshoot" the environment's carrying capacity, leading to a massive population spike followed by a crash as they exhaust the regenerating resource.
+## Troubleshooting
+- Common compile command shown above; if `java` fails, confirm `javac` succeeded
+  and that `out/` contains `.class` files.
 
-2. The "Apex Predator" Stress Test
-Users can increase the Predator Efficiency or Initial Population.
+## Contributing
+- Work on a feature branch, push, and open a Pull Request for review.
 
-The Lesson: If predators are too successful, they eliminate their only food source. This shows the "suicide of the species"—once the last prey agent is eaten, the predator population is guaranteed to hit zero shortly after.
-
-3. The "Resource Scarcity" Stress Test
-Users can throttle the Resource Regeneration Rate.
-
-The Lesson: This shows "Bottom-Up" failure. Even with healthy predators and prey, if the base energy of the environment fails, the entire tower collapses.
-
-📈 Visualizing the Balance
-A key feature of the tool is the real-time population graph. In a stable environment, these two lines should never stay flat; they should follow a "lagging" wave pattern.
-
-The Peak: When Prey population peaks, the Predator population begins to rise.
-
-The Crash: When Predator population peaks, the Prey population plummets, eventually causing the Predator line to drop in response.
-
-
-# build
-
-This project backend is built using Java (Spring Boot). Frontend work uses Next.js. See `backend/README.md` for build and run instructions for the Java service.
+If you'd like, I can add screenshots, CI steps, or an IDE launch configuration.
