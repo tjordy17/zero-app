@@ -65,6 +65,41 @@ Notes:
 - `SliderExample.java` is a separate demo that demonstrates slider usage and
   can be run independently; it is not required to use the in-sim slider.
 
+## Parameters
+The main parameters you may want to tweak are defined in the source or exposed
+via the UI slider:
+
+- `Sheep.START_ENERGY` — initial energy for new sheep (adjustable with the in‑sim slider).
+- `liveSheep`, `liveWolf` — initial population counts (set in `PredPreySim`).
+- `sheepReproductionMin` — energy threshold required for a sheep to reproduce.
+- `gridWidth`, `gridHeight` — simulation grid dimensions.
+- `stepTimerLimit` / `stepMax` — controls simulation step speed and total steps.
+
+To change parameters permanently, edit the fields in `PredPreySim.java` or
+`Sheep.java` and recompile. Runtime tweaks (like `START_ENERGY`) can be done
+with the UI slider.
+
+## Example experiments
+Try these small experiments to observe system behaviour:
+
+- Overpopulation / Crash:
+  1. Increase `Sheep.START_ENERGY` (use the slider) and `liveSheep`.
+  2. Run the sim and observe whether sheep reproduce faster than grass regenerates.
+  3. Expected: a population spike followed by a crash when resources are exhausted.
+
+- Predator collapse:
+  1. Increase `liveWolf` while keeping `liveSheep` low.
+  2. Run until predators eliminate available prey.
+  3. Expected: wolves die off after prey are depleted.
+
+- Resource scarcity:
+  1. Reduce grass initial growth in `loadCreatures()` (lower the `randint` range or
+     adjust regeneration logic in `Grass.java`).
+  2. Run and observe bottom-up failure across both species.
+
+Collect screenshots or logs to compare runs; small parameter changes produce large
+differences in long-term dynamics, which is the core teaching point of EcoSim.
+
 ## Project layout
 - Root Java files: the Swing UI and simulation code lives at the repository root.
 - `out/`: compiler output directory (ignored from version control).

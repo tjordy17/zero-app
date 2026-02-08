@@ -308,6 +308,44 @@ public class PredPreySim extends BaseFrame {
         });
         // add slider to layered pane so it displays over the drawing panel
         this.getLayeredPane().add(energySlider, JLayeredPane.PALETTE_LAYER);
+        // --- Initial population controls ---
+        JLabel sheepLabel = new JLabel("Initial Sheep:");
+        sheepLabel.setBounds(75, 200, 120, 25);
+        sheepLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        this.getLayeredPane().add(sheepLabel, JLayeredPane.PALETTE_LAYER);
+
+        JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, gridWidth * gridHeight, 1));
+        sheepSpinner.setBounds(190, 200, 80, 25);
+        sheepSpinner.setToolTipText("Set starting number of sheep");
+        sheepSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                try {
+                    liveSheep = (Integer) sheepSpinner.getValue();
+                    System.out.println("Initial sheep set to: " + liveSheep);
+                } catch (Exception ex) {
+                }
+            }
+        });
+        this.getLayeredPane().add(sheepSpinner, JLayeredPane.PALETTE_LAYER);
+
+        JLabel wolfLabel = new JLabel("Initial Wolves:");
+        wolfLabel.setBounds(75, 235, 120, 25);
+        wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        this.getLayeredPane().add(wolfLabel, JLayeredPane.PALETTE_LAYER);
+
+        JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, gridWidth * gridHeight, 1));
+        wolfSpinner.setBounds(190, 235, 80, 25);
+        wolfSpinner.setToolTipText("Set starting number of wolves");
+        wolfSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                try {
+                    liveWolf = (Integer) wolfSpinner.getValue();
+                    System.out.println("Initial wolves set to: " + liveWolf);
+                } catch (Exception ex) {
+                }
+            }
+        });
+        this.getLayeredPane().add(wolfSpinner, JLayeredPane.PALETTE_LAYER);
 
     }
 }
