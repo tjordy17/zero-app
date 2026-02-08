@@ -396,13 +396,23 @@ public class PredPreySim extends BaseFrame {
         sheepLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         settingsPanel.add(sheepLabel);
 
-        final JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, gridWidth * gridHeight, 1));
+        final int popLimit = Math.min(200, gridWidth * gridHeight);
+        final JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, popLimit, 1));
         sheepSpinner.setBounds(140, 150, 80, 25);
         sheepSpinner.setToolTipText("Set starting number of sheep");
         sheepSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 try {
-                    liveSheep = (Integer) sheepSpinner.getValue();
+                    int val = (Integer) sheepSpinner.getValue();
+                    if (val > popLimit) {
+                        JOptionPane.showMessageDialog(PredPreySim.this,
+                                "Initial sheep cannot exceed " + popLimit + ". Value will be set to " + popLimit + ".",
+                                "Population Limit",
+                                JOptionPane.WARNING_MESSAGE);
+                        val = popLimit;
+                        sheepSpinner.setValue(val);
+                    }
+                    liveSheep = val;
                     System.out.println("Initial sheep set to: " + liveSheep);
                 } catch (Exception ex) {
                 }
@@ -415,13 +425,22 @@ public class PredPreySim extends BaseFrame {
         wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         settingsPanel.add(wolfLabel);
 
-        final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, gridWidth * gridHeight, 1));
+        final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, popLimit, 1));
         wolfSpinner.setBounds(140, 185, 80, 25);
         wolfSpinner.setToolTipText("Set starting number of wolves");
         wolfSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 try {
-                    liveWolf = (Integer) wolfSpinner.getValue();
+                    int val = (Integer) wolfSpinner.getValue();
+                    if (val > popLimit) {
+                        JOptionPane.showMessageDialog(PredPreySim.this,
+                                "Initial wolves cannot exceed " + popLimit + ". Value will be set to " + popLimit + ".",
+                                "Population Limit",
+                                JOptionPane.WARNING_MESSAGE);
+                        val = popLimit;
+                        wolfSpinner.setValue(val);
+                    }
+                    liveWolf = val;
                     System.out.println("Initial wolves set to: " + liveWolf);
                 } catch (Exception ex) {
                 }
@@ -456,6 +475,23 @@ public class PredPreySim extends BaseFrame {
                     // read control values
                     int newSheep = (Integer) sheepSpinner.getValue();
                     int newWolf = (Integer) wolfSpinner.getValue();
+                    // enforce population cap at apply time as well
+                    if (newSheep > popLimit) {
+                        JOptionPane.showMessageDialog(PredPreySim.this,
+                                "Initial sheep cannot exceed " + popLimit + ". Value will be set to " + popLimit + ".",
+                                "Population Limit",
+                                JOptionPane.WARNING_MESSAGE);
+                        newSheep = popLimit;
+                        sheepSpinner.setValue(newSheep);
+                    }
+                    if (newWolf > popLimit) {
+                        JOptionPane.showMessageDialog(PredPreySim.this,
+                                "Initial wolves cannot exceed " + popLimit + ". Value will be set to " + popLimit + ".",
+                                "Population Limit",
+                                JOptionPane.WARNING_MESSAGE);
+                        newWolf = popLimit;
+                        wolfSpinner.setValue(newWolf);
+                    }
                     int newEnergy = energySlider.getValue();
                     // apply energy setting to future sheep
                     Sheep.START_ENERGY = newEnergy;
