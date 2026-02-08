@@ -28,6 +28,7 @@ public class PredPreySim extends BaseFrame {
     private int grassGrowthRate = 20, initGrassPercent = 100;
 
     private int wolfReproductionMin = 85, energyLossPerStep = 20;
+    private int sheepEnergyLossPerStep = 5;
     // ------UI------
     int screenWidth = 1530;
     int screenHeight = 850;
@@ -217,7 +218,7 @@ public class PredPreySim extends BaseFrame {
                             sheep.setX(grassArray[k][w].getX());
                             sheep.setY(grassArray[k][w].getY());
                             sheep.setTurn(false);
-                            sheep.setEnergy(sheep.getEnergy() - 5);
+                            sheep.setEnergy(sheep.getEnergy() - sheepEnergyLossPerStep);
                             if (grassArray[k][w].getGrowth() >= 100) {
                                 sheep.eatGrass();
                                 grassArray[k][w].setGrowth(0);
@@ -366,7 +367,8 @@ public class PredPreySim extends BaseFrame {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
         // Create settings panel to hold controls (left side)
-        JPanel settingsPanel = new JPanel(null);
+        JPanel settingsPanel = new JPanel();
+        settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
         // popLimit used for labels and spinner max
         final int popLimit = Math.min(200, gridWidth * gridHeight);
         // style the panel for a cleaner look
@@ -374,53 +376,140 @@ public class PredPreySim extends BaseFrame {
         settingsPanel.setBackground(new Color(245, 245, 240));
         settingsPanel.setBounds(50, 50, 400, screenHeight - 100);
         settingsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Simulation Settings"));
+        // add inner padding to the titled border for breathing room
+        settingsPanel.setBorder(BorderFactory.createCompoundBorder(settingsPanel.getBorder(), BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        // keep the panel from growing too wide inside the fixed bounds
+        settingsPanel.setMaximumSize(new Dimension(400, screenHeight - 120));
         this.getLayeredPane().add(settingsPanel, JLayeredPane.PALETTE_LAYER);
 
         // Short description under the panel title (titled border already shows title)
         JLabel desc = new JLabel("Adjust initial populations and simulation parameters");
         desc.setFont(new Font("SansSerif", Font.ITALIC, 12));
-        desc.setBounds(20, 12, 360, 18);
+        desc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        settingsPanel.add(Box.createVerticalStrut(6));
         settingsPanel.add(desc);
+        settingsPanel.add(Box.createVerticalStrut(8));
 
-        // Create a slider in the settings area to control starting energy for new sheep
-        final JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
-        energySlider.setMajorTickSpacing(10);
-        energySlider.setPaintTicks(true);
-        energySlider.setPaintLabels(true);
-        energySlider.setSnapToTicks(true);
-        // label for energy slider
-        JLabel energyLabel = new JLabel("Starting Energy (Sheep):");
-        energyLabel.setBounds(25, 40, 250, 16);
-        energyLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        settingsPanel.add(energyLabel);
+        // (Starting energy removed from settings)
 
-        // place slider inside the settings panel (coordinates relative to panel)
-        energySlider.setBounds(25, 60, 350, 60);
-        energySlider.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                if (!energySlider.getValueIsAdjusting()) {
-                    int val = energySlider.getValue();
-                    Sheep.START_ENERGY = val;
-                    System.out.println("Starting energy set to: " + val);
-                }
-            }
-        });
-        // add slider to settings panel
-        settingsPanel.add(energySlider);
-        // separator and population heading
-        JSeparator sep = new JSeparator();
-        sep.setBounds(20, 135, 360, 2);
+        // separator
+        JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+        sep.setMaximumSize(new Dimension(360, 4));
+        sep.setAlignmentX(Component.LEFT_ALIGNMENT);
         settingsPanel.add(sep);
+        settingsPanel.add(Box.createVerticalStrut(8));
 
-        // --- Initial population controls ---
+        // === Prey (Sheep) Settings ===
+        JPanel preyPanel = new JPanel();
+        preyPanel.setLayout(new BoxLayout(preyPanel, BoxLayout.Y_AXIS));
+        preyPanel.setOpaque(false);
+        preyPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        preyPanel.setMaximumSize(new Dimension(360, Short.MAX_VALUE));
+
+        JLabel preyHeader = new JLabel("Prey (Sheep)");
+        preyHeader.setFont(new Font("SansSerif", Font.BOLD, 14));
+        preyHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        preyPanel.add(preyHeader);
+        preyPanel.add(Box.createVerticalStrut(6));
+
+        JPanel sheepRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        sheepRow.setOpaque(false);
+        sheepRow.setMaximumSize(new Dimension(360, 40));
         JLabel sheepLabel = new JLabel("Initial Sheep (max " + popLimit + "):");
-        sheepLabel.setBounds(25, 150, 200, 25);
         sheepLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        settingsPanel.add(sheepLabel);
-
         final JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, popLimit, 1));
-        sheepSpinner.setBounds(230, 150, 60, 25);
-        sheepSpinner.setToolTipText("Set starting number of sheep");
+        sheepSpinner.setPreferredSize(new Dimension(80, 24));
+        sheepRow.add(sheepLabel);
+        sheepRow.add(sheepSpinner);
+        preyPanel.add(sheepRow);
+
+        JPanel sheepBirthRow = new JPanel(new BorderLayout());
+        sheepBirthRow.setOpaque(false);
+        sheepBirthRow.setMaximumSize(new Dimension(360, 70));
+        JLabel sheepBirthLabel = new JLabel("Birth threshold (lower -> more births):");
+        sheepBirthLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        sheepBirthRow.add(sheepBirthLabel, BorderLayout.NORTH);
+        final JSlider sheepBirthSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, sheepReproductionMin);
+        sheepBirthSlider.setMajorTickSpacing(20);
+        sheepBirthSlider.setPaintTicks(true);
+        sheepBirthSlider.setPaintLabels(true);
+        sheepBirthSlider.setMaximumSize(new Dimension(340, 60));
+        sheepBirthRow.add(sheepBirthSlider, BorderLayout.CENTER);
+        preyPanel.add(sheepBirthRow);
+
+        JPanel sheepDeathRow = new JPanel(new BorderLayout());
+        sheepDeathRow.setOpaque(false);
+        sheepDeathRow.setMaximumSize(new Dimension(360, 70));
+        JLabel sheepDeathLabel = new JLabel("Death rate (energy loss per move):");
+        sheepDeathLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        sheepDeathRow.add(sheepDeathLabel, BorderLayout.NORTH);
+        final JSlider sheepDeathSlider = new JSlider(JSlider.HORIZONTAL, 0, 20, sheepEnergyLossPerStep);
+        sheepDeathSlider.setMajorTickSpacing(5);
+        sheepDeathSlider.setPaintTicks(true);
+        sheepDeathSlider.setPaintLabels(true);
+        sheepDeathSlider.setMaximumSize(new Dimension(340, 60));
+        sheepDeathRow.add(sheepDeathSlider, BorderLayout.CENTER);
+        preyPanel.add(sheepDeathRow);
+
+        settingsPanel.add(preyPanel);
+        settingsPanel.add(Box.createVerticalStrut(8));
+
+        // === Predator (Wolf) Settings ===
+        JPanel predPanel = new JPanel();
+        predPanel.setLayout(new BoxLayout(predPanel, BoxLayout.Y_AXIS));
+        predPanel.setOpaque(false);
+        predPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        predPanel.setMaximumSize(new Dimension(360, Short.MAX_VALUE));
+
+        JLabel predatorHeader = new JLabel("Predator (Wolf)");
+        predatorHeader.setFont(new Font("SansSerif", Font.BOLD, 14));
+        predatorHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        predPanel.add(predatorHeader);
+        predPanel.add(Box.createVerticalStrut(6));
+
+        JPanel wolfRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        wolfRow.setOpaque(false);
+        wolfRow.setMaximumSize(new Dimension(360, 40));
+        JLabel wolfLabel = new JLabel("Initial Wolves (max " + popLimit + "):");
+        wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, popLimit, 1));
+        wolfSpinner.setPreferredSize(new Dimension(80, 24));
+        wolfRow.add(wolfLabel);
+        wolfRow.add(wolfSpinner);
+        predPanel.add(wolfRow);
+
+        JPanel wolfBirthRow = new JPanel(new BorderLayout());
+        wolfBirthRow.setOpaque(false);
+        wolfBirthRow.setMaximumSize(new Dimension(360, 70));
+        JLabel wolfBirthLabel = new JLabel("Birth threshold (lower -> more births):");
+        wolfBirthLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        wolfBirthRow.add(wolfBirthLabel, BorderLayout.NORTH);
+        final JSlider wolfBirthSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, wolfReproductionMin);
+        wolfBirthSlider.setMajorTickSpacing(20);
+        wolfBirthSlider.setPaintTicks(true);
+        wolfBirthSlider.setPaintLabels(true);
+        wolfBirthSlider.setMaximumSize(new Dimension(340, 60));
+        wolfBirthRow.add(wolfBirthSlider, BorderLayout.CENTER);
+        predPanel.add(wolfBirthRow);
+
+        JPanel wolfDeathRow = new JPanel(new BorderLayout());
+        wolfDeathRow.setOpaque(false);
+        wolfDeathRow.setMaximumSize(new Dimension(360, 70));
+        JLabel wolfDeathLabel = new JLabel("Death rate (energy loss per move):");
+        wolfDeathLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        wolfDeathRow.add(wolfDeathLabel, BorderLayout.NORTH);
+        final JSlider wolfDeathSlider = new JSlider(JSlider.HORIZONTAL, 0, 50, energyLossPerStep);
+        wolfDeathSlider.setMajorTickSpacing(10);
+        wolfDeathSlider.setPaintTicks(true);
+        wolfDeathSlider.setPaintLabels(true);
+        wolfDeathSlider.setMaximumSize(new Dimension(340, 60));
+        wolfDeathRow.add(wolfDeathSlider, BorderLayout.CENTER);
+        predPanel.add(wolfDeathRow);
+
+        settingsPanel.add(predPanel);
+        settingsPanel.add(Box.createVerticalStrut(8));
+
+        // reattach listeners for the new components
         sheepSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 try {
@@ -439,16 +528,25 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        settingsPanel.add(sheepSpinner);
 
-        JLabel wolfLabel = new JLabel("Initial Wolves (max " + popLimit + "):");
-        wolfLabel.setBounds(25, 185, 200, 25);
-        wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        settingsPanel.add(wolfLabel);
+        sheepBirthSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (!sheepBirthSlider.getValueIsAdjusting()) {
+                    sheepReproductionMin = sheepBirthSlider.getValue();
+                    System.out.println("Sheep reproduction threshold set to: " + sheepReproductionMin);
+                }
+            }
+        });
 
-        final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, popLimit, 1));
-        wolfSpinner.setBounds(230, 185, 60, 25);
-        wolfSpinner.setToolTipText("Set starting number of wolves");
+        sheepDeathSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (!sheepDeathSlider.getValueIsAdjusting()) {
+                    sheepEnergyLossPerStep = sheepDeathSlider.getValue();
+                    System.out.println("Sheep energy loss per move set to: " + sheepEnergyLossPerStep);
+                }
+            }
+        });
+
         wolfSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 try {
@@ -467,10 +565,26 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        settingsPanel.add(wolfSpinner);
+
+        wolfBirthSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (!wolfBirthSlider.getValueIsAdjusting()) {
+                    wolfReproductionMin = wolfBirthSlider.getValue();
+                    System.out.println("Wolf reproduction threshold set to: " + wolfReproductionMin);
+                }
+            }
+        });
+
+        wolfDeathSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (!wolfDeathSlider.getValueIsAdjusting()) {
+                    energyLossPerStep = wolfDeathSlider.getValue();
+                    System.out.println("Wolf energy loss per move set to: " + energyLossPerStep);
+                }
+            }
+        });
 
         // helper to keep button states consistent
-        
 
         // Control buttons using CustomButton (smaller size)
         // create a transparent panel over the simulation area and stack controls vertically
@@ -507,6 +621,8 @@ public class PredPreySim extends BaseFrame {
                 Cursor oldCursor = getCursor();
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 try {
+                    // remember whether simulation was running so we can restore that state
+                    boolean wasRunning = simRunning;
                     // read control values
                     int newSheep = (Integer) sheepSpinner.getValue();
                     int newWolf = (Integer) wolfSpinner.getValue();
@@ -527,9 +643,7 @@ public class PredPreySim extends BaseFrame {
                         newWolf = popLimit;
                         wolfSpinner.setValue(newWolf);
                     }
-                    int newEnergy = energySlider.getValue();
-                    // apply energy setting to future sheep
-                    Sheep.START_ENERGY = newEnergy;
+                    // starting energy is fixed in `Sheep.START_ENERGY` (not configurable)
                     // stop simulation while resetting
                     simRunning = false;
                     // clear current world
@@ -545,15 +659,17 @@ public class PredPreySim extends BaseFrame {
                     load = false;
                     loadCreatures();
                     load = true;
-                    // resume simulation
-                    simRunning = true;
-                    System.out.println("Applied settings and restarted world: sheep=" + newSheep + " wolves=" + newWolf + " energy=" + newEnergy);
+                    // restore previous running/paused state
+                    simRunning = wasRunning;
+                    System.out.println("Applied settings and restarted world: sheep=" + newSheep + " wolves=" + newWolf);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 } finally {
                     // restore UI state
                     setCursor(oldCursor);
                     applyBtn.setEnabled(true);
+                    // ensure play/pause visuals reflect restored state
+                    updateControlStates();
                 }
             }
         });
@@ -591,6 +707,43 @@ public class PredPreySim extends BaseFrame {
             }
         });
         simControls.add(pauseBtn);
+
+        // === Resources ===
+        JPanel resourcesPanel = new JPanel();
+        resourcesPanel.setLayout(new BoxLayout(resourcesPanel, BoxLayout.Y_AXIS));
+        resourcesPanel.setOpaque(false);
+        resourcesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        resourcesPanel.setMaximumSize(new Dimension(360, Short.MAX_VALUE));
+
+        JLabel resourcesHeader = new JLabel("Resources");
+        resourcesHeader.setFont(new Font("SansSerif", Font.BOLD, 14));
+        resourcesHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        resourcesPanel.add(resourcesHeader);
+        resourcesPanel.add(Box.createVerticalStrut(6));
+
+        JPanel grassRow = new JPanel(new BorderLayout());
+        grassRow.setOpaque(false);
+        grassRow.setMaximumSize(new Dimension(360, 70));
+        JLabel grassLabel = new JLabel("Grass growth rate:");
+        grassLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        grassRow.add(grassLabel, BorderLayout.NORTH);
+        final JSlider grassSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, grassGrowthRate);
+        grassSlider.setMajorTickSpacing(20);
+        grassSlider.setPaintTicks(true);
+        grassSlider.setPaintLabels(true);
+        grassSlider.setMaximumSize(new Dimension(340, 60));
+        grassSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (!grassSlider.getValueIsAdjusting()) {
+                    grassGrowthRate = grassSlider.getValue();
+                    System.out.println("Grass growth rate set to: " + grassGrowthRate);
+                }
+            }
+        });
+        grassRow.add(grassSlider, BorderLayout.CENTER);
+        resourcesPanel.add(grassRow);
+
+        settingsPanel.add(resourcesPanel);
 
         // initialize control visual states
         updateControlStates();
