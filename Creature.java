@@ -70,6 +70,10 @@ public class Creature {
 
     }
 
+    public boolean eat(Creature prey) {
+        return false;
+    }
+
     public void draw(Graphics2D g2d){
         
     }

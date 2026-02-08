@@ -7,6 +7,8 @@ public class Wolf extends Creature {
 
     public Wolf(int x, int y) {
         super(x, y);
+        range = 2;
+        energy = 30;
     }
 
     @Override
@@ -32,14 +34,14 @@ public class Wolf extends Creature {
 
 
     @Override
-    public boolean eat(Creature prey){
-        if (prey.isAlive()) {
+    public boolean eat(Creature prey) {
+        if (prey != null && prey.isAlive()) {
             int energyGained = 10; // Gain energy from eating prey
             int newEnergy = getEnergy() + energyGained;
             setEnergy(newEnergy);
-            prey.setEnergy(0); // Prey dies
+            prey.setEnergy(0); // prey dies
             return true;
-        } 
+        }
         return false;
     }
 
