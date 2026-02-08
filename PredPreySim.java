@@ -70,14 +70,14 @@ public class PredPreySim extends BaseFrame {
         if (playBtn != null && pauseBtn != null && applyBtn != null) {
             if (simRunning) {
                 playBtn.setEnabled(false);
-                playBtn.setActive(false);
+                //playBtn.setActive(false);
                 pauseBtn.setEnabled(true);
-                pauseBtn.setActive(true);
+                //pauseBtn.setActive(true);
             } else {
                 playBtn.setEnabled(true);
-                playBtn.setActive(true);
+                //playBtn.setActive(true);
                 pauseBtn.setEnabled(false);
-                pauseBtn.setActive(false);
+                //pauseBtn.setActive(false);
             }
             // apply button is always enabled, but we can reflect state if desired
             applyBtn.setEnabled(true);
@@ -129,7 +129,7 @@ public class PredPreySim extends BaseFrame {
                         && randint(1, 10) >= 3) {
                     wolf.setX(sheep.getX());
                     wolf.setY(sheep.getY());
-                    wolf.eat(sheep);
+                    wolf.eat();
                     wolf.setTurn(false);
                     sheeplist.remove(j);
                 }

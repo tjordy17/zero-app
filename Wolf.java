@@ -34,15 +34,9 @@ public class Wolf extends Creature {
 
 
     @Override
-    public boolean eat(Creature prey) {
-        if (prey != null && prey.isAlive()) {
-            int energyGained = 10; // Gain energy from eating prey
-            int newEnergy = getEnergy() + energyGained;
-            setEnergy(newEnergy);
-            prey.setEnergy(0); // prey dies
-            return true;
-        }
-        return false;
+    public void eat(){
+        int energyGained = 10; // Gain a fixed amount of energy from eating grass
+        energy+= energyGained;
     }
 
     public void draw(Graphics2D g2d){
