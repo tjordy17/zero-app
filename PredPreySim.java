@@ -7,9 +7,8 @@ import javax.swing.event.*;
 import java.util.*;
 
 public class PredPreySim extends BaseFrame {
-
     // ------Logic------
-    private boolean load = false, simRunning = true, sheepFlag = true;
+    private boolean load = false, simRunning = true, sheepFlag = true, wolfFlag = true;
 
     int gridWidth = 30, gridHeight = 20;
     private int[][] squares = new int[gridHeight][gridWidth];
@@ -18,13 +17,17 @@ public class PredPreySim extends BaseFrame {
     private ArrayList<Sheep> sheeplist = new ArrayList<Sheep>();
 
     private int liveGrass = 0;
-    private int liveWolf = 0;
-    private int liveSheep = 20;
+    private int liveWolf = 15;
+    private int liveSheep = 100;
 
     private int step = 0, steptimer = 0;
-    private int stepTimerLimit = 25, stepMax = 100;
+    private int stepTimerLimit = 5, stepMax = 100;
 
-    private int sheepReproductionMin = 60;
+    private int sheepReproductionMin = 65;
+
+    private int grassGrowthRate = 20, initGrassPercent = 100;
+
+    private int wolfReproductionMin = 85, energyLossPerStep = 20;
     // ------UI------
     int screenWidth = 1530;
     int screenHeight = 850;
@@ -48,12 +51,6 @@ public class PredPreySim extends BaseFrame {
     public void move() {
         if (!load) {// loads objects
             loadCreatures();
-            // tmp test
-            // sheeplist.add(new Sheep(5, 10));
-            // sheeplist.add(new Sheep(7, 15));
-            // sheeplist.get(0).setEnergy(60);
-            // sheeplist.get(1).setEnergy(60);
-
             load = true;
         }
         step();
@@ -65,7 +62,9 @@ public class PredPreySim extends BaseFrame {
             if (steptimer >= stepTimerLimit) {
                 steptimer = 0;
                 step++;
+                wolfAct();
                 sheepAct();
+                grassAct();
             }
             if (step >= stepMax) {
                 simRunning = false;
@@ -73,31 +72,85 @@ public class PredPreySim extends BaseFrame {
         }
     }
 
-    private void sheepAct() {
 
-        // System.out.print("Sheep Act");
+    private void wolfAct(){
+        //reproduction
+        for(int i = 0; i < wolflist.size(); i++){
+            Wolf wolf = wolflist.get(i);
+            Rectangle sight = new Rectangle(wolf.getX() - wolf.getRange(), wolf.getY() - wolf.getRange(),
+                    (wolf.getRange() * 2) + 1, (wolf.getRange() * 2) + 1);
+                if(wolf.getEnergy() >= wolfReproductionMin){
+                    wolf.setEnergy(wolf.getEnergy() / 2);
+                    wolf.setTurn(false);
+                    addWolf(wolflist.size());
+                }
+                //eat sheep
+                for(int j = 0; j < sheeplist.size(); j++){
+                    Sheep sheep = sheeplist.get(j);
+                    if(sight.contains(sheep.getX(), sheep.getY()) 
+                        && wolf.getTurn()
+                        && randint(1, 10) >= 3){
+                        wolf.setX(sheep.getX());
+                        wolf.setY(sheep.getY());
+                        wolf.eat();
+                        wolf.setTurn(false);
+                        sheeplist.remove(sheep);
+                    }
+                }
+
+                //not eating sheep
+                for (int w = wolfFlag ? 0 : gridWidth - 1; (wolfFlag ? w : 0) < (wolfFlag ? gridWidth : w); w = wolfFlag
+                    ? w + 1
+                    : w - 1) {
+                for (int k = wolfFlag ? 0 : gridHeight - 1; (wolfFlag ? k : 0) < (wolfFlag ? gridHeight
+                        : k); k = wolfFlag ? k + 1 : k - 1) {
+                    for (int l = 0; l < wolflist.size(); l++) {
+                        Wolf wolf2 = wolflist.get(l);
+                        // finds food
+                        if (sight.contains(grassArray[k][w].getX(), grassArray[k][w].getY())
+                                && wolf.getTurn()
+                                && randint(0, 10) >= 5
+                                && grassArray[k][w].getX() != wolf2.getX()
+                                && grassArray[k][w].getY() != wolf2.getY()) {
+                            // System.out.print("no food, sad\n");
+                            wolf.setX(grassArray[k][w].getX());
+                            wolf.setY(grassArray[k][w].getY());
+                            wolf.setTurn(false);
+                            wolf.setEnergy(wolf.getEnergy() - energyLossPerStep);
+                        }
+                    }
+                }
+            }
+            //kill wolves
+            if (wolf.getEnergy() <= 0) {
+                wolflist.remove(wolf);
+            }
+
+            if (randint(0, 1) == 1) {
+                wolfFlag = !wolfFlag;
+            }
+            wolf.setTurn(true);
+        }
+        liveWolf = wolflist.size();
+    }
+        
+
+    
+
+    private void sheepAct() {
         for (int i = 0; i < sheeplist.size(); i++) {
             Sheep sheep = sheeplist.get(i);
             // creates a rectangle and checks for different stuff
             Rectangle sight = new Rectangle(sheep.getX() - sheep.getRange(), sheep.getY() - sheep.getRange(),
                     (sheep.getRange() * 2) + 1, (sheep.getRange() * 2) + 1);
 
-            // reproducing
-
-            for (int j = 0; j < sheeplist.size(); j++) {
-                Sheep sheep2 = sheeplist.get(j);
-                if (sheep != sheep2) {
-                    if (sight.contains(sheep2.getX(), sheep2.getY())
-                            && sheep2.getEnergy() >= sheepReproductionMin
-                            && sheep.getEnergy() >= sheepReproductionMin && sheep.getTurn() && sheep2.getTurn()) {
-                        sheep.setEnergy(sheep.getEnergy() / 2);
-                        sheep2.setEnergy(sheep2.getEnergy() / 2);
-                        sheep.setTurn(false);
-                        sheep2.setTurn(false);
-                        addSheep(sheeplist.size());
-                    }
-                }
+            // reproducing asexually. sheep can represent any number of sheep
+            if (sheep.getEnergy() >= sheepReproductionMin && sheep.getTurn()) {
+                sheep.setEnergy(sheep.getEnergy() / 2);
+                sheep.setTurn(false);
+                addSheep(sheeplist.size());
             }
+
             // eating grass
             for (int w = sheepFlag ? 0 : gridWidth - 1; (sheepFlag ? w : 0) < (sheepFlag ? gridWidth : w); w = sheepFlag
                     ? w + 1
@@ -110,7 +163,7 @@ public class PredPreySim extends BaseFrame {
                         if (sight.contains(grassArray[k][w].getX(), grassArray[k][w].getY())
                                 && sheep.getTurn()
                                 && grassArray[k][w].getGrowth() >= 100
-                                && randint(0, 10) >= 5
+                                && randint(1, 10) >= 8
                                 && grassArray[k][w].getX() != sheep2.getX()
                                 && grassArray[k][w].getY() != sheep2.getY()) {
                             // System.out.print("found food to eat\n");
@@ -123,7 +176,7 @@ public class PredPreySim extends BaseFrame {
                     }
                 }
             }
-            //not eating grass
+            // not eating grass
             for (int w = sheepFlag ? 0 : gridWidth - 1; (sheepFlag ? w : 0) < (sheepFlag ? gridWidth : w); w = sheepFlag
                     ? w + 1
                     : w - 1) {
@@ -141,16 +194,34 @@ public class PredPreySim extends BaseFrame {
                             sheep.setX(grassArray[k][w].getX());
                             sheep.setY(grassArray[k][w].getY());
                             sheep.setTurn(false);
+                            sheep.setEnergy(sheep.getEnergy() - 5);
+                            if (grassArray[k][w].getGrowth() >= 100) {
+                                sheep.eatGrass();
+                                grassArray[k][w].setGrowth(0);
+                            }
                         }
                     }
                 }
             }
+            if (sheep.getEnergy() <= 0) {
+                sheeplist.remove(sheep);
+            }
+
             if (randint(0, 1) == 1) {
                 sheepFlag = !sheepFlag;
             }
             sheep.setTurn(true);
             liveSheep = sheeplist.size();
-            System.out.printf("Live sheep %d\n", liveSheep);
+            
+        }
+        System.out.printf("Live sheep %d\n", liveSheep);
+    }
+
+    private void grassAct() {
+        for (int i = 0; i < gridWidth; i++) {
+            for (int j = 0; j < gridHeight; j++) {
+                grassArray[j][i].setGrowth(grassArray[j][i].getGrowth() + grassGrowthRate);
+            }
         }
     }
 
@@ -158,7 +229,7 @@ public class PredPreySim extends BaseFrame {
         // creates grass
         for (int i = 0; i < gridWidth; i++) {
             for (int j = 0; j < gridHeight; j++) {
-                grassArray[j][i] = new Grass(i, j, randint(0, 200));
+                grassArray[j][i] = new Grass(i, j, randint(0, initGrassPercent));
                 if (grassArray[j][i].getGrowth() >= 100) {
                     liveGrass++;
                 }
@@ -170,19 +241,7 @@ public class PredPreySim extends BaseFrame {
         }
         // creates wolves
         for (int i = 0; i < liveWolf; i++) {
-            int x, y;
-            x = randint(0, gridWidth - 1);
-            y = randint(0, gridHeight - 1);
-            for (int j = 0; j < i; j++) {
-                for (int k = 0; k < sheeplist.size(); k++) {
-                    while ((wolflist.get(j).getX() == x && wolflist.get(j).getY() == y)
-                            || (sheeplist.get(k).getX() == x && sheeplist.get(k).getY() == y)) {
-                        x = randint(0, gridWidth - 1);
-                        y = randint(0, gridHeight - 1);
-                    }
-                }
-            }
-            wolflist.add(new Wolf(x, y));
+            addWolf(i);
         }
 
     }
@@ -200,33 +259,31 @@ public class PredPreySim extends BaseFrame {
         sheeplist.add(new Sheep(x, y));
     }
 
+    private void addWolf(int i){
+        int x, y;
+            x = randint(0, gridWidth - 1);
+            y = randint(0, gridHeight - 1);
+            for (int j = 0; j < i; j++) {
+                for (int k = 0; k < sheeplist.size(); k++) {
+                    while ((wolflist.get(j).getX() == x && wolflist.get(j).getY() == y)
+                            || (sheeplist.get(k).getX() == x && sheeplist.get(k).getY() == y)) {
+                        x = randint(0, gridWidth - 1);
+                        y = randint(0, gridHeight - 1);
+                    }
+                }
+            }
+            wolflist.add(new Wolf(x, y));
+    }
+
     // -----DRAWING STUFF!---------
     @Override
     public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         if (load) {
             background(g2d);
-            drawGrid(g2d);
             drawGrass(g2d);
             drawSheep(g2d);
             drawWolf(g2d);
-        }
-    }
-
-    // draws simulation elements
-    private void drawGrid(Graphics2D g2d) {
-        boolean flag = true;
-        for (int i = 0; i < squares[0].length; i++) {
-            for (int j = 0; j < squares.length; j++) {
-                if (flag) {
-                    g2d.setColor(BURNTORANGE);
-                } else {
-                    g2d.setColor(BURNTORANGELITE);
-                }
-                flag = !flag;
-                g2d.fillRect(i * 20 + 715, j * 20 + 100, 20, 20);// settings area
-            }
-            flag = !flag;
         }
     }
 
@@ -272,14 +329,6 @@ public class PredPreySim extends BaseFrame {
         PredPreySim run = new PredPreySim();
     }
 
-    // public int getScreenWidth() {
-    // return getWidth();
-    // }
-
-    // public int getScreenHeight() {
-    // return getHeight();
-    // }
-
     private int randint(int a, int b) {
         int range = b - a + 1;
         return (int) (Math.random() * range + a);
@@ -289,7 +338,7 @@ public class PredPreySim extends BaseFrame {
         super("PredPreySim", 1530, 850);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
-        // Create a slider in the settings area to control starting energy for new sheep
+         // Create a slider in the settings area to control starting energy for new sheep
         JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
         energySlider.setMajorTickSpacing(10);
         energySlider.setPaintTicks(true);
@@ -346,6 +395,5 @@ public class PredPreySim extends BaseFrame {
             }
         });
         this.getLayeredPane().add(wolfSpinner, JLayeredPane.PALETTE_LAYER);
-
     }
 }
