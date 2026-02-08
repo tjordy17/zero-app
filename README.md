@@ -11,64 +11,18 @@ repository contains a lightweight `BaseFrame` helper and a demo application
 ## Quick build & run
 From the project root (PowerShell):
 
-Compile all sources into an `out/` directory:
-```powershell
-javac -d out *.java
-```
-
-Run the application:
-```powershell
-java -cp out PredPreySim
-```
-
-Notes:
-- If you edit sources, re-run the `javac` step and restart the program.
-- For IDE usage, create a run configuration that launches `PredPreySim`.
-
-## Project layout
-- `*.java` — Java source files (UI and simulation classes).
-- `out/` — compiler output (ignored by Git via `.gitignore`).
-
-## Git and branches
-- Feature work should be done on branches (for example, `Graphics`). Push
-  your branch and open a Pull Request on GitHub for review before merging.
-- A preview branch (e.g. `merge/Graphics-preview`) can be used to test merges
-  without updating `main` immediately.
-
-## Troubleshooting
-- If you see merge conflicts (e.g., `README.md`), resolve the conflicted
-  regions, then mark resolution:
-```powershell
-git add README.md
-git commit
-```
-- If compiled artifacts are accidentally tracked, remove them from the repo
-  (they remain on disk) then commit:
-```powershell
-git rm --cached -r out
-git rm --cached *.class
-git add .gitignore
-git commit -m "Remove compiled artifacts"
-```
-
-## Development tips
-- Use VS Code's Java extensions or IntelliJ for quick run/debug and
-  Hot Code Replace (limited to method-body changes).
-- To inspect compiled bytecode, use `javap`:
-```powershell
-javap -c -p -classpath out PredPreySim
-```
-
----
-If you want screenshots, CI build steps, or Maven/Gradle integration added to
-this README, tell me what to include and I'll update it.
-# EcoSim: The Predator-Prey Balance
-
-🌿 Project Overview
-EcoSim is a focused biological simulation designed to demonstrate the "coupled" relationship between two species. By simulating individual agents, the tool reveals how predator and prey populations naturally oscillate and how external "stress tests" can trigger a total ecosystem collapse.
 # zero-app / EcoSim
 
 A small Java/Swing predator–prey simulation prototype.
+
+## Project overview 🌿
+EcoSim models interactions between prey (sheep) and predators (wolves) on a
+grid with regenerating resources (grass). Agents have energy while acting each
+step: prey gain energy from grass and reproduce when they have sufficient
+energy; predators gain energy by hunting prey. The simulation is intended as a
+teaching and exploration tool: you can tweak parameters (for example, starting
+energy, reproduction thresholds, or population sizes) and observe how the
+ecosystem responds.
 
 ## What this repository contains
 - `BaseFrame.java` — lightweight Swing helper frame used by the demo.
@@ -95,7 +49,13 @@ java -cp out PredPreySim
 
 Notes:
 - If you edit sources, re-run the `javac` step and restart the program.
-- `PredPreySim` now has a standard `public static void main(String[] args)` entrypoint.
+- `PredPreySim` has a standard `public static void main(String[] args)` entrypoint.
+
+## Running in VS Code
+- A sample debug configuration is included at `.vscode/launch.json` so you can run
+  and debug `PredPreySim` with F5 (requires the Java extensions in VS Code).
+- If you prefer the shell, compile and run using the commands above; the launch
+  configuration is optional and simply makes debugging more convenient.
 
 ## UI notes
 - The simulation window contains a settings area on the left. A `JSlider` was added
@@ -116,4 +76,3 @@ Notes:
 ## Contributing
 - Work on a feature branch, push, and open a Pull Request for review.
 
-If you'd like, I can add screenshots, CI steps, or an IDE launch configuration.
