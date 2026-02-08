@@ -31,6 +31,10 @@ public class PredPreySim extends BaseFrame {
     // ------UI------
     int screenWidth = 1530;
     int screenHeight = 850;
+    // control buttons (made fields so we can update state)
+    private CustomButton applyBtn;
+    private CustomButton playBtn;
+    private CustomButton pauseBtn;
 
     // fonts
     public static final Font bahnschrift32 = new Font("Bahnschrift", Font.PLAIN, 32);
@@ -54,6 +58,25 @@ public class PredPreySim extends BaseFrame {
             load = true;
         }
         step();
+    }
+
+    // Update play/pause button visuals and enabled state
+    private void updateControlStates() {
+        if (playBtn != null && pauseBtn != null && applyBtn != null) {
+            if (simRunning) {
+                playBtn.setEnabled(false);
+                playBtn.setActive(false);
+                pauseBtn.setEnabled(true);
+                pauseBtn.setActive(true);
+            } else {
+                playBtn.setEnabled(true);
+                playBtn.setActive(true);
+                pauseBtn.setEnabled(false);
+                pauseBtn.setActive(false);
+            }
+            // apply button is always enabled, but we can reflect state if desired
+            applyBtn.setEnabled(true);
+        }
     }
 
     private void step() {
@@ -342,14 +365,20 @@ public class PredPreySim extends BaseFrame {
         super("PredPreySim", 1530, 850);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
+        // Create settings panel to hold controls (left side)
+        JPanel settingsPanel = new JPanel(null);
+        settingsPanel.setOpaque(false);
+        settingsPanel.setBounds(50, 50, 400, screenHeight - 100);
+        this.getLayeredPane().add(settingsPanel, JLayeredPane.PALETTE_LAYER);
+
         // Create a slider in the settings area to control starting energy for new sheep
         final JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
         energySlider.setMajorTickSpacing(10);
         energySlider.setPaintTicks(true);
         energySlider.setPaintLabels(true);
         energySlider.setSnapToTicks(true);
-        // place slider inside the settings panel area (x=50..450, y=50..screenHeight-50)
-        energySlider.setBounds(75, 120, 350, 60);
+        // place slider inside the settings panel (coordinates relative to panel)
+        energySlider.setBounds(25, 70, 350, 60);
         energySlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 if (!energySlider.getValueIsAdjusting()) {
@@ -359,16 +388,16 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        // add slider to layered pane so it displays over the drawing panel
-        this.getLayeredPane().add(energySlider, JLayeredPane.PALETTE_LAYER);
+        // add slider to settings panel
+        settingsPanel.add(energySlider);
         // --- Initial population controls ---
         JLabel sheepLabel = new JLabel("Initial Sheep:");
-        sheepLabel.setBounds(75, 200, 120, 25);
+        sheepLabel.setBounds(25, 150, 120, 25);
         sheepLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        this.getLayeredPane().add(sheepLabel, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(sheepLabel);
 
         final JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, gridWidth * gridHeight, 1));
-        sheepSpinner.setBounds(190, 200, 80, 25);
+        sheepSpinner.setBounds(140, 150, 80, 25);
         sheepSpinner.setToolTipText("Set starting number of sheep");
         sheepSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -379,15 +408,15 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        this.getLayeredPane().add(sheepSpinner, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(sheepSpinner);
 
         JLabel wolfLabel = new JLabel("Initial Wolves:");
-        wolfLabel.setBounds(75, 235, 120, 25);
+        wolfLabel.setBounds(25, 185, 120, 25);
         wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        this.getLayeredPane().add(wolfLabel, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(wolfLabel);
 
         final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, gridWidth * gridHeight, 1));
-        wolfSpinner.setBounds(190, 235, 80, 25);
+        wolfSpinner.setBounds(140, 185, 80, 25);
         wolfSpinner.setToolTipText("Set starting number of wolves");
         wolfSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -398,11 +427,14 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        this.getLayeredPane().add(wolfSpinner, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(wolfSpinner);
+
+        // helper to keep button states consistent
+        
 
         // Control buttons using CustomButton (smaller size)
-        CustomButton applyBtn = new CustomButton("reset");
-        applyBtn.setBounds(75, 270, 60, 60);
+        applyBtn = new CustomButton("reset");
+        applyBtn.setBounds(25, 220, 60, 60);
         applyBtn.setToolTipText("Apply current settings and restart world");
         applyBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -454,29 +486,34 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        this.getLayeredPane().add(applyBtn, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(applyBtn);
 
         // Play and Pause buttons to control simulation
-        CustomButton playBtn = new CustomButton("play");
-        playBtn.setBounds(145, 270, 60, 60);
+        playBtn = new CustomButton("play");
+        playBtn.setBounds(95, 220, 60, 60);
         playBtn.setToolTipText("Resume simulation");
         playBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 simRunning = true;
+                updateControlStates();
                 System.out.println("Simulation resumed");
             }
         });
-        this.getLayeredPane().add(playBtn, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(playBtn);
 
-        CustomButton pauseBtn = new CustomButton("pause");
-        pauseBtn.setBounds(215, 270, 60, 60);
+        pauseBtn = new CustomButton("pause");
+        pauseBtn.setBounds(165, 220, 60, 60);
         pauseBtn.setToolTipText("Pause simulation");
         pauseBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 simRunning = false;
+                updateControlStates();
                 System.out.println("Simulation paused");
             }
         });
-        this.getLayeredPane().add(pauseBtn, JLayeredPane.PALETTE_LAYER);
+        settingsPanel.add(pauseBtn);
+
+        // initialize control visual states
+        updateControlStates();
     }
 }

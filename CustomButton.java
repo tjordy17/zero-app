@@ -3,6 +3,7 @@ import javax.swing.*;
 
 public class CustomButton extends JButton {
     private String type; 
+    private boolean active = false;
 
     public CustomButton(String type) {
         this.type = type.toLowerCase();
@@ -12,13 +13,24 @@ public class CustomButton extends JButton {
         setPreferredSize(new Dimension(60, 60));
     }
 
+    public void setActive(boolean a) {
+        this.active = a;
+        repaint();
+    }
+
+    public boolean isActive() {
+        return this.active;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // 1. Background Circle
-        if (getModel().isArmed()) {
+        if (active) {
+            g2.setColor(new Color(52, 152, 219)); // active blue
+        } else if (getModel().isArmed()) {
             g2.setColor(new Color(30, 130, 70));
         } else {
             g2.setColor(new Color(46, 204, 113));
