@@ -69,15 +69,24 @@ Notes:
 The main parameters you may want to tweak are defined in the source or exposed
 via the UI slider:
 
-- `Sheep.START_ENERGY` — initial energy for new sheep (adjustable with the in‑sim slider).
-- `liveSheep`, `liveWolf` — initial population counts (set in `PredPreySim`).
-- `sheepReproductionMin` — energy threshold required for a sheep to reproduce.
-- `gridWidth`, `gridHeight` — simulation grid dimensions.
-- `stepTimerLimit` / `stepMax` — controls simulation step speed and total steps.
+Current in-sim controls (left settings panel):
 
-To change parameters permanently, edit the fields in `PredPreySim.java` or
-`Sheep.java` and recompile. Runtime tweaks (like `START_ENERGY`) can be done
-with the UI slider.
+- `Initial Sheep` (spinner) — `liveSheep`, initial prey population.
+- `Birth threshold` (sheep slider) — `sheepReproductionMin`, lower => more births.
+- `Death rate` (sheep slider) — `sheepEnergyLossPerStep`, energy lost per sheep move.
+- `Initial Wolves` (spinner) — `liveWolf`, initial predator population.
+- `Birth threshold` (wolf slider) — `wolfReproductionMin`, lower => more wolf births.
+- `Death rate` (wolf slider) — `energyLossPerStep`, energy lost per wolf move.
+- `Grass growth rate` (slider) — `grassGrowthRate`, controls how quickly grass regenerates.
+
+- Controls application: use the **reset** button ("Apply current settings and restart world") to apply spinner/slider values and restart the simulation with the new settings.
+- Play/Pause buttons control simulation execution without changing parameters.
+
+Notes on `START_ENERGY` and permanent edits:
+- `Sheep.START_ENERGY` is currently a code-level field (set in `Sheep.java`) and is not exposed in the settings panel. To change it permanently, edit `Sheep.START_ENERGY` and recompile.
+- Other fields such as `gridWidth`, `gridHeight`, `stepTimerLimit`, and `stepMax` are defined in `PredPreySim.java`; change them there for permanent effects and recompile.
+
+To change parameters permanently, edit the fields in [PredPreySim.java](PredPreySim.java) or [Sheep.java](Sheep.java) and recompile. Runtime tweaks available through the settings panel take effect when you press the **reset** button.
 
 ## Example experiments
 Try these small experiments to observe system behaviour:
