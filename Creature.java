@@ -1,28 +1,47 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.*;
+
 public class Creature {
-    private int energy;
-    private int x;
-    private int y;
+    protected int energy;
+    protected int x;
+    protected int y;
 
 
-    public Creature(int energy) {
+    public Creature(int x, int y) {
         this.energy = 30;
-        this.x = 0;
-        this.y = 0;
+        this.x = x;
+        this.y = y;
     }
 
     public int getEnergy() {
         return energy;
     }
-
     public void setEnergy(int energy) {
         this.energy = energy;
+    }
+
+    public int getX(){
+        return x;
+    }
+
+    public void setX(int x){
+        this.x = x;
+    }
+
+    public int getY(){
+        return y;
+    }
+
+    public void setY(int y){
+        this.y = y;
     }
 
     public boolean isAlive() {
         return energy > 0;
     }
 
-    public void move(int x, int y) {
+    public void move() {
         // move the creature to a new position (x, y)
 
 
@@ -39,13 +58,8 @@ public class Creature {
         return false;
     }
 
-    public void draw(int x, int y){
-        
+    public void draw(Graphics2D g2d){
         
     }
-
-
-
-
 }
 
