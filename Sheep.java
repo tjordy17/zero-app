@@ -3,11 +3,12 @@ public class Sheep extends Creature {
     public static final Color White = new Color(245, 245, 245);
     public static final Color Grey = new Color(128, 128, 128);
     int energyGained = 10;
+    public static int START_ENERGY = 30;
 
     public Sheep(int x, int y) {
         super(x, y);
         range = 2;//will check two spots around it
-        energy = 30;
+        energy = START_ENERGY;
     }
 
     @Override

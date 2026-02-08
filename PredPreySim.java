@@ -3,6 +3,7 @@ import javax.swing.*;
 //import java.io.*; 
 //import javax.imageio.*; 
 import java.awt.*;
+import javax.swing.event.*;
 import java.util.*;
 
 public class PredPreySim extends BaseFrame {
@@ -267,7 +268,7 @@ public class PredPreySim extends BaseFrame {
     }
 
     // ------MAIN & HELPER FUNCTIONS-------------
-    public static void main() {
+    public static void main(String[] args) {
         PredPreySim run = new PredPreySim();
     }
 
@@ -288,6 +289,25 @@ public class PredPreySim extends BaseFrame {
         super("PredPreySim", 1530, 850);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
+        // Create a slider in the settings area to control starting energy for new sheep
+        JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
+        energySlider.setMajorTickSpacing(10);
+        energySlider.setPaintTicks(true);
+        energySlider.setPaintLabels(true);
+        energySlider.setSnapToTicks(true);
+        // place slider inside the settings panel area (x=50..450, y=50..screenHeight-50)
+        energySlider.setBounds(75, 120, 350, 60);
+        energySlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (!energySlider.getValueIsAdjusting()) {
+                    int val = energySlider.getValue();
+                    Sheep.START_ENERGY = val;
+                    System.out.println("Starting energy set to: " + val);
+                }
+            }
+        });
+        // add slider to layered pane so it displays over the drawing panel
+        this.getLayeredPane().add(energySlider, JLayeredPane.PALETTE_LAYER);
 
     }
 }
