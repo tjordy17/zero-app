@@ -1,5 +1,5 @@
 import javax.swing.*;
-//import java.awt.event.*;
+import java.awt.event.*;
 //import java.io.*; 
 //import javax.imageio.*; 
 import java.awt.*;
@@ -342,8 +342,8 @@ public class PredPreySim extends BaseFrame {
         super("PredPreySim", 1530, 850);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
-         // Create a slider in the settings area to control starting energy for new sheep
-        JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
+        // Create a slider in the settings area to control starting energy for new sheep
+        final JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
         energySlider.setMajorTickSpacing(10);
         energySlider.setPaintTicks(true);
         energySlider.setPaintLabels(true);
@@ -367,7 +367,7 @@ public class PredPreySim extends BaseFrame {
         sheepLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         this.getLayeredPane().add(sheepLabel, JLayeredPane.PALETTE_LAYER);
 
-        JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, gridWidth * gridHeight, 1));
+        final JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, gridWidth * gridHeight, 1));
         sheepSpinner.setBounds(190, 200, 80, 25);
         sheepSpinner.setToolTipText("Set starting number of sheep");
         sheepSpinner.addChangeListener(new ChangeListener() {
@@ -386,7 +386,7 @@ public class PredPreySim extends BaseFrame {
         wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         this.getLayeredPane().add(wolfLabel, JLayeredPane.PALETTE_LAYER);
 
-        JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, gridWidth * gridHeight, 1));
+        final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, gridWidth * gridHeight, 1));
         wolfSpinner.setBounds(190, 235, 80, 25);
         wolfSpinner.setToolTipText("Set starting number of wolves");
         wolfSpinner.addChangeListener(new ChangeListener() {
@@ -399,5 +399,42 @@ public class PredPreySim extends BaseFrame {
             }
         });
         this.getLayeredPane().add(wolfSpinner, JLayeredPane.PALETTE_LAYER);
+
+        // Apply & Restart button: reinitialize world with current control values
+        JButton applyBtn = new JButton("Apply & Restart");
+        applyBtn.setBounds(75, 275, 200, 30);
+        applyBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // read control values
+                    int newSheep = (Integer) sheepSpinner.getValue();
+                    int newWolf = (Integer) wolfSpinner.getValue();
+                    int newEnergy = energySlider.getValue();
+                    // apply energy setting to future sheep
+                    Sheep.START_ENERGY = newEnergy;
+                    // stop simulation while resetting
+                    simRunning = false;
+                    // clear current world
+                    sheeplist.clear();
+                    wolflist.clear();
+                    liveGrass = 0;
+                    // set counts
+                    liveSheep = newSheep;
+                    liveWolf = newWolf;
+                    // reset step counter
+                    step = 0;
+                    // reload creatures immediately
+                    load = false;
+                    loadCreatures();
+                    load = true;
+                    // resume simulation
+                    simRunning = true;
+                    System.out.println("Applied settings and restarted world: sheep=" + newSheep + " wolves=" + newWolf + " energy=" + newEnergy);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        this.getLayeredPane().add(applyBtn, JLayeredPane.PALETTE_LAYER);
     }
 }
