@@ -473,9 +473,23 @@ public class PredPreySim extends BaseFrame {
         
 
         // Control buttons using CustomButton (smaller size)
+        // create a transparent panel over the simulation area and stack controls vertically
+        JPanel simControls = new JPanel();
+        simControls.setLayout(new BoxLayout(simControls, BoxLayout.Y_AXIS));
+        simControls.setOpaque(false);
+        // place simControls on top of the simulation drawing area (same bounds as simulation area)
+        int simX = 525;
+        int simY = 50;
+        int simW = 940;
+        int simH = screenHeight - 350;
+        simControls.setBounds(simX, simY, simW, simH);
+        this.getLayeredPane().add(simControls, JLayeredPane.PALETTE_LAYER);
+
         applyBtn = new CustomButton("reset");
-        applyBtn.setBounds(25, 220, 60, 60);
         applyBtn.setToolTipText("Apply current settings and restart world");
+        applyBtn.setMaximumSize(new Dimension(60, 60));
+        applyBtn.setPreferredSize(new Dimension(60, 60));
+        applyBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         applyBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // confirm with user
@@ -543,12 +557,17 @@ public class PredPreySim extends BaseFrame {
                 }
             }
         });
-        settingsPanel.add(applyBtn);
+        // add to the simControls panel so they sit inside the simulation area (left side)
+        simControls.add(Box.createVerticalStrut(20));
+        simControls.add(applyBtn);
+        simControls.add(Box.createVerticalStrut(20));
 
         // Play and Pause buttons to control simulation
         playBtn = new CustomButton("play");
-        playBtn.setBounds(95, 220, 60, 60);
         playBtn.setToolTipText("Resume simulation");
+        playBtn.setMaximumSize(new Dimension(60, 60));
+        playBtn.setPreferredSize(new Dimension(60, 60));
+        playBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         playBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 simRunning = true;
@@ -556,11 +575,14 @@ public class PredPreySim extends BaseFrame {
                 System.out.println("Simulation resumed");
             }
         });
-        settingsPanel.add(playBtn);
+        simControls.add(playBtn);
+        simControls.add(Box.createVerticalStrut(20));
 
         pauseBtn = new CustomButton("pause");
-        pauseBtn.setBounds(165, 220, 60, 60);
         pauseBtn.setToolTipText("Pause simulation");
+        pauseBtn.setMaximumSize(new Dimension(60, 60));
+        pauseBtn.setPreferredSize(new Dimension(60, 60));
+        pauseBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         pauseBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 simRunning = false;
@@ -568,7 +590,7 @@ public class PredPreySim extends BaseFrame {
                 System.out.println("Simulation paused");
             }
         });
-        settingsPanel.add(pauseBtn);
+        simControls.add(pauseBtn);
 
         // initialize control visual states
         updateControlStates();
