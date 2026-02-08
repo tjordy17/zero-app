@@ -8,8 +8,6 @@ repository contains a lightweight `BaseFrame` helper and a demo application
 - Java Development Kit (JDK) 11 or newer installed and on your `PATH`.
 - (Optional) VS Code or IntelliJ IDEA for editing and debugging.
 
-## Quick build & run
-From the project root (PowerShell):
 
 # zero-app / EcoSim
 
