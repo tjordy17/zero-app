@@ -36,6 +36,10 @@ public class PredPreySim extends BaseFrame {
     private CustomButton applyBtn;
     private CustomButton playBtn;
     private CustomButton pauseBtn;
+    // history for stats graph
+    private java.util.List<Integer> sheepHistory = Collections.synchronizedList(new ArrayList<Integer>());
+    private java.util.List<Integer> wolfHistory = Collections.synchronizedList(new ArrayList<Integer>());
+    private int historyMax = 200;
 
     // fonts
     public static final Font bahnschrift32 = new Font("Bahnschrift", Font.PLAIN, 32);
@@ -89,6 +93,15 @@ public class PredPreySim extends BaseFrame {
                 wolfAct();
                 sheepAct();
                 grassAct();
+                // record stats for graph (trim to historyMax)
+                synchronized (sheepHistory) {
+                    sheepHistory.add(liveSheep);
+                    if (sheepHistory.size() > historyMax) sheepHistory.remove(0);
+                }
+                synchronized (wolfHistory) {
+                    wolfHistory.add(liveWolf);
+                    if (wolfHistory.size() > historyMax) wolfHistory.remove(0);
+                }
             }
             if (step >= stepMax) {
                 simRunning = false;
@@ -707,6 +720,90 @@ public class PredPreySim extends BaseFrame {
             }
         });
         simControls.add(pauseBtn);
+
+        // --- Graph panel (stats area) ---
+        JPanel graphPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                // transparent background so underlying background shows
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth();
+                int h = getHeight();
+                // draw axis baseline
+                g2.setColor(new Color(230, 230, 230, 180));
+                g2.fillRect(0, 0, w, h);
+                g2.setColor(Color.DARK_GRAY);
+                g2.drawLine(40, h - 30, w - 10, h - 30); // x-axis
+                g2.drawLine(40, 10, 40, h - 30); // y-axis
+
+                // find max value for scaling
+                int maxVal = 1;
+                synchronized (sheepHistory) {
+                    for (int v : sheepHistory) if (v > maxVal) maxVal = v;
+                }
+                synchronized (wolfHistory) {
+                    for (int v : wolfHistory) if (v > maxVal) maxVal = v;
+                }
+                maxVal = Math.max(maxVal, 1);
+
+                // draw grid lines and labels
+                int gridLines = 4;
+                for (int i = 0; i <= gridLines; i++) {
+                    int y = 10 + i * (h - 40) / gridLines;
+                    g2.setColor(new Color(200, 200, 200, 120));
+                    g2.drawLine(45, y, w - 10, y);
+                    int label = (int) ((gridLines - i) * (double) maxVal / gridLines);
+                    g2.setColor(Color.BLACK);
+                    g2.drawString(Integer.toString(label), 6, y + 4);
+                }
+
+                // draw sheep line (blue)
+                g2.setStroke(new BasicStroke(2f));
+                g2.setColor(new Color(30, 144, 255));
+                drawHistoryLine(g2, sheepHistory, w, h, maxVal);
+
+                // draw wolf line (red)
+                g2.setColor(new Color(220, 20, 60));
+                drawHistoryLine(g2, wolfHistory, w, h, maxVal);
+
+                // legend
+                g2.setColor(new Color(30, 144, 255));
+                g2.fillRect(w - 170, 12, 10, 10);
+                g2.setColor(Color.BLACK);
+                g2.drawString("Sheep", w - 152, 22);
+                g2.setColor(new Color(220, 20, 60));
+                g2.fillRect(w - 90, 12, 10, 10);
+                g2.setColor(Color.BLACK);
+                g2.drawString("Wolves", w - 70, 22);
+            }
+
+            private void drawHistoryLine(Graphics2D g2, java.util.List<Integer> data, int w, int h, int maxVal) {
+                if (data.size() < 2) return;
+                int plotW = w - 60;
+                int plotH = h - 50;
+                int startX = 45;
+                int baseY = h - 30;
+                int n = data.size();
+                double xStep = (double) plotW / Math.max(historyMax - 1, 1);
+                int[] xs = new int[n];
+                int[] ys = new int[n];
+                for (int i = 0; i < n; i++) {
+                    xs[i] = startX + (int) (xStep * (historyMax - n + i));
+                    double frac = (double) data.get(i) / (double) maxVal;
+                    ys[i] = baseY - (int) (frac * plotH);
+                }
+                g2.drawPolyline(xs, ys, n);
+            }
+        };
+        graphPanel.setOpaque(false);
+        int statsX = 525;
+        int statsY = 590;
+        int statsW = 940;
+        int statsH = 200;
+        graphPanel.setBounds(statsX, statsY, statsW, statsH);
+        this.getLayeredPane().add(graphPanel, JLayeredPane.PALETTE_LAYER);
 
         // === Resources ===
         JPanel resourcesPanel = new JPanel();
