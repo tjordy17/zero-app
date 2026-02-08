@@ -74,45 +74,43 @@ public class PredPreySim extends BaseFrame {
 
 
     private void wolfAct(){
-        //reproduction
-        for(int i = 0; i < wolflist.size(); i++){
+        // reproduction and actions — iterate backwards to allow safe removals
+        for (int i = wolflist.size() - 1; i >= 0; i--) {
             Wolf wolf = wolflist.get(i);
             Rectangle sight = new Rectangle(wolf.getX() - wolf.getRange(), wolf.getY() - wolf.getRange(),
                     (wolf.getRange() * 2) + 1, (wolf.getRange() * 2) + 1);
-                if(wolf.getEnergy() >= wolfReproductionMin){
-                    wolf.setEnergy(wolf.getEnergy() / 2);
-                    wolf.setTurn(false);
-                    addWolf(wolflist.size());
-                }
-                //eat sheep
-                for(int j = 0; j < sheeplist.size(); j++){
-                    Sheep sheep = sheeplist.get(j);
-                    if(sight.contains(sheep.getX(), sheep.getY()) 
+            if (wolf.getEnergy() >= wolfReproductionMin) {
+                wolf.setEnergy(wolf.getEnergy() / 2);
+                wolf.setTurn(false);
+                addWolf(wolflist.size());
+            }
+            // eat sheep (iterate backwards so removals are safe)
+            for (int j = sheeplist.size() - 1; j >= 0; j--) {
+                Sheep sheep = sheeplist.get(j);
+                if (sight.contains(sheep.getX(), sheep.getY())
                         && wolf.getTurn()
-                        && randint(1, 10) >= 3){
-                        wolf.setX(sheep.getX());
-                        wolf.setY(sheep.getY());
-                        wolf.eat();
-                        wolf.setTurn(false);
-                        sheeplist.remove(sheep);
-                    }
+                        && randint(1, 10) >= 3) {
+                    wolf.setX(sheep.getX());
+                    wolf.setY(sheep.getY());
+                    wolf.eat(sheep);
+                    wolf.setTurn(false);
+                    sheeplist.remove(j);
                 }
+            }
 
-                //not eating sheep
-                for (int w = wolfFlag ? 0 : gridWidth - 1; (wolfFlag ? w : 0) < (wolfFlag ? gridWidth : w); w = wolfFlag
+            // not eating sheep: move around
+            for (int w = wolfFlag ? 0 : gridWidth - 1; (wolfFlag ? w : 0) < (wolfFlag ? gridWidth : w); w = wolfFlag
                     ? w + 1
                     : w - 1) {
                 for (int k = wolfFlag ? 0 : gridHeight - 1; (wolfFlag ? k : 0) < (wolfFlag ? gridHeight
                         : k); k = wolfFlag ? k + 1 : k - 1) {
                     for (int l = 0; l < wolflist.size(); l++) {
                         Wolf wolf2 = wolflist.get(l);
-                        // finds food
                         if (sight.contains(grassArray[k][w].getX(), grassArray[k][w].getY())
                                 && wolf.getTurn()
                                 && randint(0, 10) >= 5
                                 && grassArray[k][w].getX() != wolf2.getX()
                                 && grassArray[k][w].getY() != wolf2.getY()) {
-                            // System.out.print("no food, sad\n");
                             wolf.setX(grassArray[k][w].getX());
                             wolf.setY(grassArray[k][w].getY());
                             wolf.setTurn(false);
@@ -121,9 +119,11 @@ public class PredPreySim extends BaseFrame {
                     }
                 }
             }
-            //kill wolves
+
+            // kill wolves with no energy
             if (wolf.getEnergy() <= 0) {
-                wolflist.remove(wolf);
+                wolflist.remove(i);
+                continue;
             }
 
             if (randint(0, 1) == 1) {
@@ -138,7 +138,7 @@ public class PredPreySim extends BaseFrame {
     
 
     private void sheepAct() {
-        for (int i = 0; i < sheeplist.size(); i++) {
+        for (int i = sheeplist.size() - 1; i >= 0; i--) {
             Sheep sheep = sheeplist.get(i);
             // creates a rectangle and checks for different stuff
             Rectangle sight = new Rectangle(sheep.getX() - sheep.getRange(), sheep.getY() - sheep.getRange(),
@@ -204,7 +204,8 @@ public class PredPreySim extends BaseFrame {
                 }
             }
             if (sheep.getEnergy() <= 0) {
-                sheeplist.remove(sheep);
+                sheeplist.remove(i);
+                continue;
             }
 
             if (randint(0, 1) == 1) {
@@ -212,7 +213,6 @@ public class PredPreySim extends BaseFrame {
             }
             sheep.setTurn(true);
             liveSheep = sheeplist.size();
-            
         }
         System.out.printf("Live sheep %d\n", liveSheep);
     }
@@ -326,7 +326,11 @@ public class PredPreySim extends BaseFrame {
 
     // ------MAIN & HELPER FUNCTIONS-------------
     public static void main(String[] args) {
-        PredPreySim run = new PredPreySim();
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new PredPreySim();
+            }
+        });
     }
 
     private int randint(int a, int b) {
