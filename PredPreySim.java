@@ -367,9 +367,20 @@ public class PredPreySim extends BaseFrame {
         Dimension screenSize = toolkit.getScreenSize();
         // Create settings panel to hold controls (left side)
         JPanel settingsPanel = new JPanel(null);
-        settingsPanel.setOpaque(false);
+        // popLimit used for labels and spinner max
+        final int popLimit = Math.min(200, gridWidth * gridHeight);
+        // style the panel for a cleaner look
+        settingsPanel.setOpaque(true);
+        settingsPanel.setBackground(new Color(245, 245, 240));
         settingsPanel.setBounds(50, 50, 400, screenHeight - 100);
+        settingsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Simulation Settings"));
         this.getLayeredPane().add(settingsPanel, JLayeredPane.PALETTE_LAYER);
+
+        // Short description under the panel title (titled border already shows title)
+        JLabel desc = new JLabel("Adjust initial populations and simulation parameters");
+        desc.setFont(new Font("SansSerif", Font.ITALIC, 12));
+        desc.setBounds(20, 12, 360, 18);
+        settingsPanel.add(desc);
 
         // Create a slider in the settings area to control starting energy for new sheep
         final JSlider energySlider = new JSlider(JSlider.HORIZONTAL, 0, 100, Sheep.START_ENERGY);
@@ -377,8 +388,14 @@ public class PredPreySim extends BaseFrame {
         energySlider.setPaintTicks(true);
         energySlider.setPaintLabels(true);
         energySlider.setSnapToTicks(true);
+        // label for energy slider
+        JLabel energyLabel = new JLabel("Starting Energy (Sheep):");
+        energyLabel.setBounds(25, 40, 250, 16);
+        energyLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        settingsPanel.add(energyLabel);
+
         // place slider inside the settings panel (coordinates relative to panel)
-        energySlider.setBounds(25, 70, 350, 60);
+        energySlider.setBounds(25, 60, 350, 60);
         energySlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 if (!energySlider.getValueIsAdjusting()) {
@@ -390,15 +407,19 @@ public class PredPreySim extends BaseFrame {
         });
         // add slider to settings panel
         settingsPanel.add(energySlider);
+        // separator and population heading
+        JSeparator sep = new JSeparator();
+        sep.setBounds(20, 135, 360, 2);
+        settingsPanel.add(sep);
+
         // --- Initial population controls ---
-        JLabel sheepLabel = new JLabel("Initial Sheep:");
-        sheepLabel.setBounds(25, 150, 120, 25);
+        JLabel sheepLabel = new JLabel("Initial Sheep (max " + popLimit + "):");
+        sheepLabel.setBounds(25, 150, 200, 25);
         sheepLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         settingsPanel.add(sheepLabel);
 
-        final int popLimit = Math.min(200, gridWidth * gridHeight);
         final JSpinner sheepSpinner = new JSpinner(new SpinnerNumberModel(liveSheep, 0, popLimit, 1));
-        sheepSpinner.setBounds(140, 150, 80, 25);
+        sheepSpinner.setBounds(230, 150, 60, 25);
         sheepSpinner.setToolTipText("Set starting number of sheep");
         sheepSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -420,13 +441,13 @@ public class PredPreySim extends BaseFrame {
         });
         settingsPanel.add(sheepSpinner);
 
-        JLabel wolfLabel = new JLabel("Initial Wolves:");
-        wolfLabel.setBounds(25, 185, 120, 25);
+        JLabel wolfLabel = new JLabel("Initial Wolves (max " + popLimit + "):");
+        wolfLabel.setBounds(25, 185, 200, 25);
         wolfLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         settingsPanel.add(wolfLabel);
 
         final JSpinner wolfSpinner = new JSpinner(new SpinnerNumberModel(liveWolf, 0, popLimit, 1));
-        wolfSpinner.setBounds(140, 185, 80, 25);
+        wolfSpinner.setBounds(230, 185, 60, 25);
         wolfSpinner.setToolTipText("Set starting number of wolves");
         wolfSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
