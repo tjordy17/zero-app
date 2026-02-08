@@ -400,11 +400,26 @@ public class PredPreySim extends BaseFrame {
         });
         this.getLayeredPane().add(wolfSpinner, JLayeredPane.PALETTE_LAYER);
 
-        // Apply & Restart button: reinitialize world with current control values
-        JButton applyBtn = new JButton("Apply & Restart");
-        applyBtn.setBounds(75, 275, 200, 30);
+        // Control buttons using CustomButton (smaller size)
+        CustomButton applyBtn = new CustomButton("reset");
+        applyBtn.setBounds(75, 270, 60, 60);
+        applyBtn.setToolTipText("Apply current settings and restart world");
         applyBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // confirm with user
+                int choice = JOptionPane.showConfirmDialog(PredPreySim.this,
+                        "Apply settings and restart the world?",
+                        "Confirm Restart",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (choice != JOptionPane.YES_OPTION) {
+                    return;
+                }
+
+                // disable the button and show wait cursor while restarting
+                applyBtn.setEnabled(false);
+                Cursor oldCursor = getCursor();
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 try {
                     // read control values
                     int newSheep = (Integer) sheepSpinner.getValue();
@@ -432,9 +447,36 @@ public class PredPreySim extends BaseFrame {
                     System.out.println("Applied settings and restarted world: sheep=" + newSheep + " wolves=" + newWolf + " energy=" + newEnergy);
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                } finally {
+                    // restore UI state
+                    setCursor(oldCursor);
+                    applyBtn.setEnabled(true);
                 }
             }
         });
         this.getLayeredPane().add(applyBtn, JLayeredPane.PALETTE_LAYER);
+
+        // Play and Pause buttons to control simulation
+        CustomButton playBtn = new CustomButton("play");
+        playBtn.setBounds(145, 270, 60, 60);
+        playBtn.setToolTipText("Resume simulation");
+        playBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                simRunning = true;
+                System.out.println("Simulation resumed");
+            }
+        });
+        this.getLayeredPane().add(playBtn, JLayeredPane.PALETTE_LAYER);
+
+        CustomButton pauseBtn = new CustomButton("pause");
+        pauseBtn.setBounds(215, 270, 60, 60);
+        pauseBtn.setToolTipText("Pause simulation");
+        pauseBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                simRunning = false;
+                System.out.println("Simulation paused");
+            }
+        });
+        this.getLayeredPane().add(pauseBtn, JLayeredPane.PALETTE_LAYER);
     }
 }

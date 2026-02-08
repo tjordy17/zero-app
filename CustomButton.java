@@ -9,7 +9,7 @@ public class CustomButton extends JButton {
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
-        setPreferredSize(new Dimension(100, 100));
+        setPreferredSize(new Dimension(60, 60));
     }
 
     @Override
