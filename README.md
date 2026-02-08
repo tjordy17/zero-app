@@ -31,7 +31,7 @@ ecosystem responds.
 - `SliderExample.java` — a standalone example showing a `JSlider` usage.
 
 ## Prerequisites
-- Java Development Kit (JDK) 11 or newer installed and on your `PATH`.
+- Java Development Kit (JDK) 17 installed and on your `PATH`.
 - (Optional) An IDE such as VS Code or IntelliJ IDEA for editing/debugging.
 
 ## Quick build & run
@@ -57,6 +57,24 @@ Notes:
 - If you prefer the shell, compile and run using the commands above; the launch
   configuration is optional and simply makes debugging more convenient.
 
+## How to run (three quick commands)
+From the project root use these three commands as a quick workflow:
+
+1. Compile all sources into `out/`:
+```powershell
+javac -d out *.java
+```
+2. Run the application:
+```powershell
+java -cp out PredPreySim
+```
+3. Capture console output to a log file (PowerShell example):
+```powershell
+java -cp out PredPreySim *> run.log
+```
+
+The log command is optional — use it when you want to keep a record of the run.
+
 ## UI notes
 - The simulation window contains a settings area on the left. A `JSlider` was added
   to the settings region to control the starting energy for newly created sheep
@@ -64,6 +82,18 @@ Notes:
   before starting or reloading the simulation.
 - `SliderExample.java` is a separate demo that demonstrates slider usage and
   can be run independently; it is not required to use the in-sim slider.
+
+## Short description & controls
+- Short description: EcoSim is a small, interactive predator–prey grid simulation
+  where sheep eat regenerating grass and wolves hunt sheep. It demonstrates
+  population dynamics and resource-driven collapse.
+
+- Controls (left settings panel):
+  - Spinners: `Initial Sheep`, `Initial Wolves` — set starting populations.
+  - Sliders: birth thresholds and death/energy-loss rates for sheep and wolves, plus `Grass growth rate`.
+  - Buttons: `reset` (apply settings + restart world), `play`, and `pause`.
+
+Use the `reset` button after adjusting spinners/sliders to apply changes and restart the simulation.
 
 ## Parameters
 The main parameters you may want to tweak are defined in the source or exposed
@@ -89,34 +119,88 @@ Notes on `START_ENERGY` and permanent edits:
 To change parameters permanently, edit the fields in [PredPreySim.java](PredPreySim.java) or [Sheep.java](Sheep.java) and recompile. Runtime tweaks available through the settings panel take effect when you press the **reset** button.
 
 ## Example experiments
-Try these small experiments to observe system behaviour:
+"""
+# zero-app / EcoSim
 
-- Overpopulation / Crash:
-  1. Increase `Sheep.START_ENERGY` (use the slider) and `liveSheep`.
-  2. Run the sim and observe whether sheep reproduce faster than grass regenerates.
-  3. Expected: a population spike followed by a crash when resources are exhausted.
+A small Java/Swing predator–prey simulation prototype used for demos and
+hackathon submissions. This README includes quick steps to build a runnable
+JAR and package the project for sharing with judges.
 
-- Predator collapse:
-  1. Increase `liveWolf` while keeping `liveSheep` low.
-  2. Run until predators eliminate available prey.
-  3. Expected: wolves die off after prey are depleted.
+## Hackathon — Quick share (recommended)
+- Produce a runnable JAR and a short `README.md` + demo video/screenshots.
+- Include these assets for judges: `PredPreySim.jar`, source files or a
+  GitHub link, `README.md`, 30–60s demo video, and 2–3 screenshots.
 
-- Resource scarcity:
-  1. Reduce grass initial growth in `loadCreatures()` (lower the `randint` range or
-     adjust regeneration logic in `Grass.java`).
-  2. Run and observe bottom-up failure across both species.
+## Prerequisites
+- Java Development Kit (JDK) 17 or newer installed and on your `PATH`.
+- (Optional) An IDE such as VS Code or IntelliJ for editing/debugging.
 
-Collect screenshots or logs to compare runs; small parameter changes produce large
-differences in long-term dynamics, which is the core teaching point of EcoSim.
+## Build & run (minimal)
+From the project root (PowerShell or any shell):
 
-## Project layout
-- Root Java files: the Swing UI and simulation code lives at the repository root.
-- `out/`: compiler output directory (ignored from version control).
+1) Compile all sources into `out/`:
+```powershell
+javac -d out *.java
+```
 
-## Troubleshooting
-- Common compile command shown above; if `java` fails, confirm `javac` succeeded
-  and that `out/` contains `.class` files.
+2) Create an executable (fat) JAR that uses `PredPreySim` as the main class:
+```powershell
+# create a jar with main class set; include compiled classes from out/
+jar cfe PredPreySim.jar PredPreySim -C out .
+```
 
-## Contributing
-- Work on a feature branch, push, and open a Pull Request for review.
+3) Run the JAR:
+```powershell
+java -jar PredPreySim.jar
+```
+
+If you prefer running from classes without creating a JAR, use:
+```powershell
+java -cp out PredPreySim
+```
+
+## Create a ZIP for quick sharing (Windows PowerShell)
+```powershell
+Compress-Archive -Path * -DestinationPath ../zero-app.zip
+```
+This produces `zero-app.zip` one level above the project root; upload that or
+attach it to a GitHub Release.
+
+## GitHub Release (fast)
+1. Push your repo to GitHub (include source and `README.md`).
+2. Create a new Release and upload `PredPreySim.jar` (and optionally
+   `zero-app.zip`) as release assets so judges can download a single file.
+
+## What to include for judges
+- `PredPreySim.jar` — runnable artifact (primary).
+- Source files or a GitHub link — for review.
+- `README.md` — this file, with run steps and Java version.
+- Demo video (30–60s) and 2–3 screenshots — show the app running and controls.
+
+## Troubleshooting & tips
+- If `jar` complains about missing classes, ensure `javac -d out *.java` created
+  `.class` files under `out/` and rerun the `jar` command.
+- For GUI apps prefer a runnable JAR over Docker — judges can run it with
+  `java -jar` if they have Java installed.
+- Use environment variables or command-line args for any external endpoints.
+
+## Development notes
+- `PredPreySim.java` contains the `main` entrypoint; tweak parameters there for
+  permanent changes or use the UI sliders/spinners for runtime tweaks.
+- Key source files: `BaseFrame.java`, `PredPreySim.java`, `Sheep.java`, `Wolf.java`, `Grass.java`, `Creature.java`.
+
+## Example quick commands recap
+```powershell
+javac -d out *.java
+jar cfe PredPreySim.jar PredPreySim -C out .
+java -jar PredPreySim.jar
+Compress-Archive -Path * -DestinationPath ../zero-app.zip
+```
+
+---
+If you want, I can create `PredPreySim.jar` now in the workspace and add the
+jar to a GitHub release draft — tell me if you want me to (A) build the JAR
+now, (B) add a short demo GIF, or (C) create a release draft on GitHub.
+
+"""
 
