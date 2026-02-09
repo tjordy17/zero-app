@@ -8,107 +8,191 @@ repository contains a lightweight `BaseFrame` helper and a demo application
 - Java Development Kit (JDK) 11 or newer installed and on your `PATH`.
 - (Optional) VS Code or IntelliJ IDEA for editing and debugging.
 
+
+# zero-app / EcoSim
+
+A small Java/Swing predator–prey simulation prototype.
+
+## Project overview 🌿
+EcoSim models interactions between prey (sheep) and predators (wolves) on a
+grid with regenerating resources (grass). Agents have energy while acting each
+step: prey gain energy from grass and reproduce when they have sufficient
+energy; predators gain energy by hunting prey. The simulation is intended as a
+teaching and exploration tool: you can tweak parameters (for example, starting
+energy, reproduction thresholds, or population sizes) and observe how the
+ecosystem responds.
+
+## What this repository contains
+- `BaseFrame.java` — lightweight Swing helper frame used by the demo.
+- `PredPreySim.java` — main simulation application (Swing GUI + simulation).
+- `Sheep.java`, `Wolf.java`, `Grass.java`, `Creature.java` — simulation agent classes.
+- `SliderExample.java` — a standalone example showing a `JSlider` usage.
+
+## Prerequisites
+- Java Development Kit (JDK) 17 installed and on your `PATH`.
+- (Optional) An IDE such as VS Code or IntelliJ IDEA for editing/debugging.
+
 ## Quick build & run
-From the project root (PowerShell):
+From the project root (PowerShell or any shell):
 
 Compile all sources into an `out/` directory:
 ```powershell
 javac -d out *.java
 ```
 
-Run the application:
+Run the application (this launches the Swing GUI):
 ```powershell
 java -cp out PredPreySim
 ```
 
 Notes:
 - If you edit sources, re-run the `javac` step and restart the program.
-- For IDE usage, create a run configuration that launches `PredPreySim`.
+- `PredPreySim` has a standard `public static void main(String[] args)` entrypoint.
 
-## Project layout
-- `*.java` — Java source files (UI and simulation classes).
-- `out/` — compiler output (ignored by Git via `.gitignore`).
+## Running in VS Code
+- A sample debug configuration is included at `.vscode/launch.json` so you can run
+  and debug `PredPreySim` with F5 (requires the Java extensions in VS Code).
+- If you prefer the shell, compile and run using the commands above; the launch
+  configuration is optional and simply makes debugging more convenient.
 
-## Git and branches
-- Feature work should be done on branches (for example, `Graphics`). Push
-  your branch and open a Pull Request on GitHub for review before merging.
-- A preview branch (e.g. `merge/Graphics-preview`) can be used to test merges
-  without updating `main` immediately.
+## How to run (three quick commands)
+From the project root use these three commands as a quick workflow:
 
-## Troubleshooting
-- If you see merge conflicts (e.g., `README.md`), resolve the conflicted
-  regions, then mark resolution:
+1. Compile all sources into `out/`:
 ```powershell
-git add README.md
-git commit
+javac -d out *.java
 ```
-- If compiled artifacts are accidentally tracked, remove them from the repo
-  (they remain on disk) then commit:
+2. Run the application:
 ```powershell
-git rm --cached -r out
-git rm --cached *.class
-git add .gitignore
-git commit -m "Remove compiled artifacts"
+java -cp out PredPreySim
+```
+3. Capture console output to a log file (PowerShell example):
+```powershell
+java -cp out PredPreySim *> run.log
 ```
 
-## Development tips
-- Use VS Code's Java extensions or IntelliJ for quick run/debug and
-  Hot Code Replace (limited to method-body changes).
-- To inspect compiled bytecode, use `javap`:
+The log command is optional — use it when you want to keep a record of the run.
+
+## UI notes
+- The simulation window contains a settings area on the left. A `JSlider` was added
+  to the settings region to control the starting energy for newly created sheep
+  (backing field: `Sheep.START_ENERGY`). Use the slider to tweak initial energy
+  before starting or reloading the simulation.
+- `SliderExample.java` is a separate demo that demonstrates slider usage and
+  can be run independently; it is not required to use the in-sim slider.
+
+## Short description & controls
+- Short description: EcoSim is a small, interactive predator–prey grid simulation
+  where sheep eat regenerating grass and wolves hunt sheep. It demonstrates
+  population dynamics and resource-driven collapse.
+
+- Controls (left settings panel):
+  - Spinners: `Initial Sheep`, `Initial Wolves` — set starting populations.
+  - Sliders: birth thresholds and death/energy-loss rates for sheep and wolves, plus `Grass growth rate`.
+  - Buttons: `reset` (apply settings + restart world), `play`, and `pause`.
+
+Use the `reset` button after adjusting spinners/sliders to apply changes and restart the simulation.
+
+## Parameters
+The main parameters you may want to tweak are defined in the source or exposed
+via the UI slider:
+
+Current in-sim controls (left settings panel):
+
+- `Initial Sheep` (spinner) — `liveSheep`, initial prey population.
+- `Birth threshold` (sheep slider) — `sheepReproductionMin`, lower => more births.
+- `Death rate` (sheep slider) — `sheepEnergyLossPerStep`, energy lost per sheep move.
+- `Initial Wolves` (spinner) — `liveWolf`, initial predator population.
+- `Birth threshold` (wolf slider) — `wolfReproductionMin`, lower => more wolf births.
+- `Death rate` (wolf slider) — `energyLossPerStep`, energy lost per wolf move.
+- `Grass growth rate` (slider) — `grassGrowthRate`, controls how quickly grass regenerates.
+
+- Controls application: use the **reset** button ("Apply current settings and restart world") to apply spinner/slider values and restart the simulation with the new settings.
+- Play/Pause buttons control simulation execution without changing parameters.
+
+Notes on `START_ENERGY` and permanent edits:
+- `Sheep.START_ENERGY` is currently a code-level field (set in `Sheep.java`) and is not exposed in the settings panel. To change it permanently, edit `Sheep.START_ENERGY` and recompile.
+- Other fields such as `gridWidth`, `gridHeight`, `stepTimerLimit`, and `stepMax` are defined in `PredPreySim.java`; change them there for permanent effects and recompile.
+
+To change parameters permanently, edit the fields in [PredPreySim.java](PredPreySim.java) or [Sheep.java](Sheep.java) and recompile. Runtime tweaks available through the settings panel take effect when you press the **reset** button.
+
+## Example experiments
+"""
+# zero-app / EcoSim
+
+A small Java/Swing predator–prey simulation prototype used for demos and
+hackathon submissions. This README includes quick steps to build a runnable
+JAR and package the project for sharing with judges.
+
+## Hackathon — Quick share (recommended)
+- Produce a runnable JAR and a short `README.md` + demo video/screenshots.
+- Include these assets for judges: `PredPreySim.jar`, source files or a
+  GitHub link, `README.md`, 30–60s demo video, and 2–3 screenshots.
+
+## Prerequisites
+- Java Development Kit (JDK) 17 or newer installed and on your `PATH`.
+- (Optional) An IDE such as VS Code or IntelliJ for editing/debugging.
+
+## Build & run (minimal)
+From the project root (PowerShell or any shell):
+
+1) Compile all sources into `out/`:
 ```powershell
-javap -c -p -classpath out PredPreySim
+javac -d out *.java
+```
+
+2) Create an executable (fat) JAR that uses `PredPreySim` as the main class:
+```powershell
+# create a jar with main class set; include compiled classes from out/
+jar cfe PredPreySim.jar PredPreySim -C out .
+```
+
+3) Run the JAR:
+```powershell
+java -jar PredPreySim.jar
+```
+
+If you prefer running from classes without creating a JAR, use:
+```powershell
+java -cp out PredPreySim
+```
+
+## Create a ZIP for quick sharing (Windows PowerShell)
+```powershell
+Compress-Archive -Path * -DestinationPath ../zero-app.zip
+```
+This produces `zero-app.zip` one level above the project root; upload that or
+attach it to a GitHub Release.
+
+## GitHub Release (fast)
+1. Push your repo to GitHub (include source and `README.md`).
+2. Create a new Release and upload `PredPreySim.jar` (and optionally
+   `zero-app.zip`) as release assets so judges can download a single file.
+
+## What to include for judges
+- `PredPreySim.jar` — runnable artifact (primary).
+- Source files or a GitHub link — for review.
+- `README.md` — this file, with run steps and Java version.
+- Demo video (30–60s) and 2–3 screenshots — show the app running and controls.
+
+## Troubleshooting & tips
+- If `jar` complains about missing classes, ensure `javac -d out *.java` created
+  `.class` files under `out/` and rerun the `jar` command.
+- For GUI apps prefer a runnable JAR over Docker — judges can run it with
+  `java -jar` if they have Java installed.
+- Use environment variables or command-line args for any external endpoints.
+
+## Development notes
+- `PredPreySim.java` contains the `main` entrypoint; tweak parameters there for
+  permanent changes or use the UI sliders/spinners for runtime tweaks.
+- Key source files: `BaseFrame.java`, `PredPreySim.java`, `Sheep.java`, `Wolf.java`, `Grass.java`, `Creature.java`.
+
+## Example quick commands recap
+```powershell
+javac -d out *.java
+jar cfe PredPreySim.jar PredPreySim -C out .
+java -jar PredPreySim.jar
+Compress-Archive -Path * -DestinationPath ../zero-app.zip
 ```
 
 ---
-If you want screenshots, CI build steps, or Maven/Gradle integration added to
-this README, tell me what to include and I'll update it.
-# EcoSim: The Predator-Prey Balance
-
-🌿 Project Overview
-EcoSim is a focused biological simulation designed to demonstrate the "coupled" relationship between two species. By simulating individual agents, the tool reveals how predator and prey populations naturally oscillate and how external "stress tests" can trigger a total ecosystem collapse.
-
-🧬 The Core Logic: The Energy Loop
-The simulation operates on a closed-loop energy system. Every "step" (iteration) calculates the survival of two agent types:
-
-The Prey: Gains energy by consuming a regenerating environmental resource. Their goal is to avoid predators while maintaining enough energy to reproduce.
-
-The Predator: Gains energy exclusively by hunting prey. If the prey population drops too low, the predators face immediate starvation.
-
-Agent Decision Tree
-Can I Reproduce? (If Energy > Threshold + Mate is nearby) → Action: Spend energy to spawn new agent.
-
-Am I Hungry? (If Food is in Range) → Action: Move to food and consume.
-
-Am I Lost? (No food/mate detected) → Action: Random movement (Scout) at an energy cost.
-
-Am I Out of Energy? (If Energy ≤ 0) → Action: Death/Removal from grid.
-
-🛠 Environmental Stress Tests
-The "Learning Tool" aspect allows users to intentionally break the ecosystem to see the consequences:
-
-1. The "Invasive Growth" Stress Test
-Users can set the Prey Reproduction Rate to maximum.
-
-The Lesson: This demonstrates how prey can "overshoot" the environment's carrying capacity, leading to a massive population spike followed by a crash as they exhaust the regenerating resource.
-
-2. The "Apex Predator" Stress Test
-Users can increase the Predator Efficiency or Initial Population.
-
-The Lesson: If predators are too successful, they eliminate their only food source. This shows the "suicide of the species"—once the last prey agent is eaten, the predator population is guaranteed to hit zero shortly after.
-
-3. The "Resource Scarcity" Stress Test
-Users can throttle the Resource Regeneration Rate.
-
-The Lesson: This shows "Bottom-Up" failure. Even with healthy predators and prey, if the base energy of the environment fails, the entire tower collapses.
-
-📈 Visualizing the Balance
-A key feature of the tool is the real-time population graph. In a stable environment, these two lines should never stay flat; they should follow a "lagging" wave pattern.
-
-The Peak: When Prey population peaks, the Predator population begins to rise.
-
-The Crash: When Predator population peaks, the Prey population plummets, eventually causing the Predator line to drop in response.
-
-
-# build
-
-This project backend is built using Java (Spring Boot). Frontend work uses Next.js. See `backend/README.md` for build and run instructions for the Java service.
